@@ -23,7 +23,7 @@ WRITE_COL_LV2  = 7  # G列: 更新用
 WRITE_COL_LV3  = 8  # H列: 更新用
 
 # ==========================================
-# 🎨 デザイン設定 & CSS (コンパクト版)
+# 🎨 デザイン設定 & CSS (2カラム対応版)
 # ==========================================
 st.set_page_config(page_title="Weakness Killer", page_icon="🔥", layout="wide")
 
@@ -36,7 +36,6 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
     
-    /* アプリ全体の上下余白を削減 */
     .block-container {
         padding-top: 2rem;
         padding-bottom: 3rem;
@@ -45,29 +44,28 @@ st.markdown("""
     /* --- カード本体 --- */
     .task-card {
         background-color: #ffffff;
-        border-radius: 12px; /* 少し角丸を小さく */
+        border-radius: 12px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        margin-bottom: 20px; /* カード間の隙間を削減 */
+        margin-bottom: 20px;
         border: 1px solid #e2e8f0;
         overflow: hidden;
+        height: 100%; /* グリッド内で高さを揃える */
     }
 
-    /* --- カードヘッダー（優先度バー） --- */
     .card-header-bar {
-        height: 6px; /* 細くする */
+        height: 6px;
         width: 100%;
     }
 
-    /* --- コンテンツエリア (ここが重要) --- */
     .card-content {
-        padding: 16px; /* 余白を大幅削減 (24px -> 16px) */
+        padding: 16px;
     }
 
     /* --- 画像スタイル --- */
     div[data-testid="stImage"] {
         display: flex;
         justify-content: center;
-        align-items: flex-start; /* 上寄せにする */
+        align-items: flex-start;
         height: 100%;
         min-height: auto;
     }
@@ -76,24 +74,20 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 500px; /* PCでの高さ制限 */
+        max-height: 200px; /* グリッド表示に合わせて少し高さを抑える */
         width: auto !important;
         max-width: 100%;
     }
 
-    /* --- テキスト要素の余白リセット --- */
-    p, h1, h2, h3 {
-        margin-bottom: 0px !important;
-    }
+    p, h1, h2, h3 { margin-bottom: 0px !important; }
 
-    /* --- 情報ラベル --- */
     .info-label {
-        font-size: 11px; /* 小さく */
+        font-size: 11px;
         color: #94a3b8;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-top: 8px; /* 上に少し隙間 */
+        margin-top: 8px;
         margin-bottom: 2px;
     }
     .date-text {
@@ -105,7 +99,6 @@ st.markdown("""
         gap: 6px;
     }
 
-    /* --- ステージバッジ --- */
     .stage-badge {
         display: inline-block;
         padding: 3px 10px;
@@ -113,15 +106,14 @@ st.markdown("""
         font-size: 11px;
         font-weight: 800;
         color: white;
-        margin-bottom: 4px; /* 下の余白削減 */
+        margin-bottom: 4px;
     }
 
-    /* --- プログレスバー --- */
     .progress-track {
         background-color: #f1f5f9;
-        height: 6px; /* 細く */
+        height: 6px;
         border-radius: 999px;
-        margin: 8px 0 16px 0; /* 上下の隙間を詰める */
+        margin: 8px 0 16px 0;
         overflow: hidden;
     }
     .progress-fill {
@@ -131,18 +123,13 @@ st.markdown("""
 
     /* --- スマホ調整 --- */
     @media only screen and (max-width: 600px) {
-        .card-content {
-            padding: 12px; /* スマホでは更に詰める */
-        }
         div[data-testid="stImage"] img {
-            max-height: 200px; /* スマホでの画像高さ */
+            max-height: 180px;
         }
-        /* カラム間の隙間を詰める */
         [data-testid="column"] {
             padding: 0 !important;
         }
     }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -192,7 +179,6 @@ for i, row in df.iterrows():
     try:
         if len(row) <= max(COL_Q_NUM, COL_LAST_DATE, COL_IMG_URL, COL_SCORE, COL_LV3_IDX): continue
         
-        # データ取得
         q_num = row[COL_Q_NUM]
         last_date = row[COL_LAST_DATE]
         raw_url = row[COL_IMG_URL]
@@ -220,7 +206,6 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # 🖥️ メインUI構築
 # ==========================================
 
-# ヘッダー
 st.title("🔥 Weakness Killer")
 st.caption(f"Priority > {min_score} | Tasks: {len(tasks)}")
 st.markdown("---")
@@ -230,90 +215,93 @@ if not tasks:
     st.balloons()
     st.success("🎉 All weaknesses eliminated!")
 else:
-    for task in tasks:
-        # ステータス判定
-        if task["lv2"]:
-            stage_name = "Lv3"
-            stage_color = "#3b82f6"
-            progress_pct = "66%"
-            target_check_col = WRITE_COL_LV3
-        elif task["lv1"]:
-            stage_name = "Lv2"
-            stage_color = "#8b5cf6"
-            progress_pct = "33%"
-            target_check_col = WRITE_COL_LV2
-        else:
-            stage_name = "Lv1"
-            stage_color = "#10b981"
-            progress_pct = "5%"
-            target_check_col = WRITE_COL_LV1
-            
-        # 優先度色
-        if task["score"] >= 100: border_color = "#ef4444"
-        elif task["score"] >= 50: border_color = "#f59e0b"
-        else: border_color = "#10b981"
+    # -------------------------------------------------------
+    # 🖥️ グリッド表示ロジック (2列)
+    # -------------------------------------------------------
+    # タスクを2つずつのペア(行)にする
+    rows = [tasks[i:i + 2] for i in range(0, len(tasks), 2)]
 
-        # --- カード開始 ---
-        st.markdown(f"""<div class="task-card">
-            <div class="card-header-bar" style="background-color: {border_color};"></div>
-            <div class="card-content">""", unsafe_allow_html=True)
+    for row in rows:
+        cols = st.columns(2) # 2列のカラムを作成（スマホでは自動で縦になります）
+        
+        for idx, task in enumerate(row):
+            with cols[idx]:
+                # --- カード描画 ---
+                if task["lv2"]:
+                    stage_name = "Lv3"
+                    stage_color = "#3b82f6"
+                    progress_pct = "66%"
+                    target_check_col = WRITE_COL_LV3
+                elif task["lv1"]:
+                    stage_name = "Lv2"
+                    stage_color = "#8b5cf6"
+                    progress_pct = "33%"
+                    target_check_col = WRITE_COL_LV2
+                else:
+                    stage_name = "Lv1"
+                    stage_color = "#10b981"
+                    progress_pct = "5%"
+                    target_check_col = WRITE_COL_LV1
+                    
+                if task["score"] >= 100: border_color = "#ef4444"
+                elif task["score"] >= 50: border_color = "#f59e0b"
+                else: border_color = "#10b981"
 
-        # ★ 修正: 比率を [1, 2] に設定し、間延びを防止
-        col_img, col_info = st.columns([1, 2])
+                st.markdown(f"""<div class="task-card">
+                    <div class="card-header-bar" style="background-color: {border_color};"></div>
+                    <div class="card-content">""", unsafe_allow_html=True)
 
-        # 左: 画像
-        with col_img:
-            if task["img"]:
-                st.image(task["img"])
-            else:
-                st.warning("No Image")
+                # グリッド内なので、カード内部は[1, 1.5]くらいの比率で調整
+                col_img, col_info = st.columns([1, 1.5])
 
-        # 右: 情報
-        with col_info:
-            # Stage Badge
-            st.markdown(f"""
-            <div class="stage-badge" style="background-color: {stage_color};">
-                {stage_name}
-            </div>
-            """, unsafe_allow_html=True)
+                with col_img:
+                    if task["img"]:
+                        st.image(task["img"])
+                    else:
+                        st.warning("No Image")
 
-            # 前回実施日
-            display_date = task["date"] if task["date"] else "🆕 初挑戦"
-            st.markdown(f"""
-            <div class="info-label" style="margin-top:0;">LAST REVIEWED</div>
-            <div class="date-text">📅 {display_date}</div>
-            """, unsafe_allow_html=True)
+                with col_info:
+                    st.markdown(f"""
+                    <div class="stage-badge" style="background-color: {stage_color};">
+                        {stage_name}
+                    </div>
+                    """, unsafe_allow_html=True)
 
-            # プログレスバー
-            st.markdown(f"""
-            <div class="progress-track">
-                <div class="progress-fill" style="width: {progress_pct}; background-color: {stage_color};"></div>
-            </div>
-            """, unsafe_allow_html=True)
+                    display_date = task["date"] if task["date"] else "🆕 初挑戦"
+                    st.markdown(f"""
+                    <div class="info-label" style="margin-top:0;">LAST REVIEWED</div>
+                    <div class="date-text">📅 {display_date}</div>
+                    """, unsafe_allow_html=True)
 
-            # アクションボタン
-            b1, b2, b3 = st.columns(3)
-            today_str = datetime.now().strftime('%Y/%m/%d')
-            
-            with b1:
-                if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
-                    sheet.update_cell(task["index"], target_check_col, True)
-                    sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                    st.toast("Level Up!")
-                    time.sleep(1)
-                    st.rerun()
-            with b2:
-                if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
-                    sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                    st.toast("Keep trying!")
-                    time.sleep(1)
-                    st.rerun()
-            with b3:
-                if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
-                    sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                    st.toast("Don't worry!")
-                    time.sleep(1)
-                    st.rerun()
+                    st.markdown(f"""
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width: {progress_pct}; background-color: {stage_color};"></div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-        # --- カード終了 ---
-        st.markdown('</div></div>', unsafe_allow_html=True)
+                    # ボタンを縦並びにするか、アイコンのみにして省スペース化も検討できますが
+                    # 一旦シンプルな3カラムで配置
+                    b1, b2, b3 = st.columns(3)
+                    today_str = datetime.now().strftime('%Y/%m/%d')
+                    
+                    with b1:
+                        if st.button("🟢", key=f"easy_{task['index']}", help="余裕", use_container_width=True):
+                            sheet.update_cell(task["index"], target_check_col, True)
+                            sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                            st.toast("Level Up!")
+                            time.sleep(1)
+                            st.rerun()
+                    with b2:
+                        if st.button("🟡", key=f"soso_{task['index']}", help="微妙", use_container_width=True):
+                            sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                            st.toast("Keep trying!")
+                            time.sleep(1)
+                            st.rerun()
+                    with b3:
+                        if st.button("🔴", key=f"bad_{task['index']}", help="敗北", use_container_width=True):
+                            sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                            st.toast("Don't worry!")
+                            time.sleep(1)
+                            st.rerun()
+
+                st.markdown('</div></div>', unsafe_allow_html=True)
