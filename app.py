@@ -23,7 +23,7 @@ WRITE_COL_LV2  = 7  # G列: 更新用
 WRITE_COL_LV3  = 8  # H列: 更新用
 
 # ==========================================
-# 🎨 デザイン設定 & CSS (2カラム対応版)
+# 🎨 デザイン設定 & CSS
 # ==========================================
 st.set_page_config(page_title="Weakness Killer", page_icon="🔥", layout="wide")
 
@@ -49,7 +49,7 @@ st.markdown("""
         margin-bottom: 20px;
         border: 1px solid #e2e8f0;
         overflow: hidden;
-        height: 100%; /* グリッド内で高さを揃える */
+        height: 100%;
     }
 
     .card-header-bar {
@@ -74,7 +74,7 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 800px; /* グリッド表示に合わせて少し高さを抑える */
+        max-height: 250px; /* PCでの高さ */
         width: auto !important;
         max-width: 100%;
     }
@@ -119,6 +119,11 @@ st.markdown("""
     .progress-fill {
         height: 100%;
         border-radius: 999px;
+    }
+    
+    /* ボタン間の余白調整 */
+    .stButton button {
+        margin-bottom: 4px;
     }
 
     /* --- スマホ調整 --- */
@@ -218,11 +223,10 @@ else:
     # -------------------------------------------------------
     # 🖥️ グリッド表示ロジック (2列)
     # -------------------------------------------------------
-    # タスクを2つずつのペア(行)にする
     rows = [tasks[i:i + 2] for i in range(0, len(tasks), 2)]
 
     for row in rows:
-        cols = st.columns(2) # 2列のカラムを作成（スマホでは自動で縦になります）
+        cols = st.columns(2)
         
         for idx, task in enumerate(row):
             with cols[idx]:
@@ -251,7 +255,6 @@ else:
                     <div class="card-header-bar" style="background-color: {border_color};"></div>
                     <div class="card-content">""", unsafe_allow_html=True)
 
-                # グリッド内なので、カード内部は[1, 1.5]くらいの比率で調整
                 col_img, col_info = st.columns([1, 1.5])
 
                 with col_img:
@@ -279,29 +282,31 @@ else:
                     </div>
                     """, unsafe_allow_html=True)
 
-                    # ボタンを縦並びにするか、アイコンのみにして省スペース化も検討できますが
-                    # 一旦シンプルな3カラムで配置
-                    b1, b2, b3 = st.columns(3)
+                    # ==========================================
+                    # 👇 ボタンを縦並びに変更 & 文字復活
+                    # ==========================================
                     today_str = datetime.now().strftime('%Y/%m/%d')
                     
-                    with b1:
-                        if st.button("🟢", key=f"easy_{task['index']}", help="余裕", use_container_width=True):
-                            sheet.update_cell(task["index"], target_check_col, True)
-                            sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                            st.toast("Level Up!")
-                            time.sleep(1)
-                            st.rerun()
-                    with b2:
-                        if st.button("🟡", key=f"soso_{task['index']}", help="微妙", use_container_width=True):
-                            sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                            st.toast("Keep trying!")
-                            time.sleep(1)
-                            st.rerun()
-                    with b3:
-                        if st.button("🔴", key=f"bad_{task['index']}", help="敗北", use_container_width=True):
-                            sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                            st.toast("Don't worry!")
-                            time.sleep(1)
-                            st.rerun()
+                    # 🟢 余裕 (Full Width)
+                    if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
+                        sheet.update_cell(task["index"], target_check_col, True)
+                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                        st.toast("Level Up!")
+                        time.sleep(1)
+                        st.rerun()
+                    
+                    # 🟡 微妙 (Full Width)
+                    if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
+                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                        st.toast("Keep trying!")
+                        time.sleep(1)
+                        st.rerun()
+                        
+                    # 🔴 敗北 (Full Width)
+                    if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
+                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                        st.toast("Don't worry!")
+                        time.sleep(1)
+                        st.rerun()
 
                 st.markdown('</div></div>', unsafe_allow_html=True)
