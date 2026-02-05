@@ -10,7 +10,7 @@ import time
 # ==========================================
 
 # 📥 読み込み用（Pandasは0始まり: A=0, B=1, C=2...）
-COL_Q_NUM   = 2  # C列: 問題名
+COL_Q_NUM   = 2  # C列: 問題名（※表示はしませんが内部管理用に使います）
 COL_LAST_DATE = 3 # D列: 前回実施日（ここを表示に使います）
 COL_IMG_URL = 9  # J列: 画像URL（作業用列）
 COL_SCORE   = 8  # I列: スコア
@@ -49,32 +49,26 @@ st.markdown("""
         margin-bottom: 24px;
     }
     
-    /* 問題名 */
-    .task-title {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 8px;
-    }
-    
-    /* 日付表示 */
+    /* 日付表示（文字サイズUP） */
     .task-date {
-        font-size: 14px;
-        color: #64748b;
+        font-size: 18px; /* 14px -> 18px */
+        font-weight: 600;
+        color: #475569;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         margin-bottom: 16px;
     }
     
-    /* バッジ共通 */
+    /* バッジ共通（文字サイズUP） */
     .badge {
         display: inline-block;
-        padding: 4px 12px;
+        padding: 6px 16px; /* 余白も大きく */
         border-radius: 9999px;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 16px; /* 12px -> 16px */
+        font-weight: 700;
         margin-right: 8px;
+        margin-bottom: 12px;
     }
     
     /* 優先度バッジの色 */
@@ -82,12 +76,16 @@ st.markdown("""
     .badge-warning { background-color: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
     .badge-info { background-color: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
 
-    /* ステータス表示 */
+    /* ステータス表示（文字サイズUP・強調） */
     .status-label {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 20px; /* 14px -> 20px */
+        font-weight: 700;
         color: #059669;
-        margin-bottom: 12px;
+        margin-bottom: 24px; /* ボタンとの距離を少し空ける */
+        background-color: #ecfdf5;
+        padding: 8px 12px;
+        border-radius: 8px;
+        display: inline-block;
     }
     
     /* 画像エリア */
@@ -95,6 +93,7 @@ st.markdown("""
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -180,7 +179,7 @@ else:
     st.markdown(f"##### 優先度 {min_score} 以上の課題: {len(tasks)} 問")
     
     for task in tasks:
-        # カードコンテナの開始（見た目を作るためのHTML）
+        # カードコンテナの開始
         st.markdown('<div class="task-card">', unsafe_allow_html=True)
         
         c1, c2 = st.columns([1, 1.5])
@@ -188,14 +187,13 @@ else:
         # --- 左カラム: 画像 ---
         with c1:
             if task["img"]:
-                # 画像の角を丸くするためのコンテナ
                 st.markdown(f'<div class="img-container"><img src="{task["img"]}" style="width:100%"></div>', unsafe_allow_html=True)
             else:
                 st.warning("📷 画像なし")
 
         # --- 右カラム: 情報 & 操作 ---
         with c2:
-            # 1. バッジ表示 (HTMLでスタイリング)
+            # 1. バッジ表示 (優先度) - 文字サイズUP
             if task["score"] >= 100:
                 badge_html = f'<span class="badge badge-danger">🚨 優先度: {task["score"]}</span>'
             elif task["score"] >= 50:
@@ -205,9 +203,8 @@ else:
             
             st.markdown(badge_html, unsafe_allow_html=True)
 
-            # 2. 問題タイトルと日付
-            st.markdown(f'<div class="task-title">{task["name"]}</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="task-date">📅 前回実施: {task["date"]}</div>', unsafe_allow_html=True)
+            # 2. 日付表示 (名前を削除し、日付を強調)
+            st.markdown(f'<div class="task-date">📅 前回: {task["date"]}</div>', unsafe_allow_html=True)
 
             # 3. 進捗ステータス判定
             if task["lv2"]:
@@ -220,6 +217,7 @@ else:
                 current_stage = "Lv1 (初挑戦)"
                 target_check_col = WRITE_COL_LV1
             
+            # Next Step表示 - 文字サイズUP & 強調
             st.markdown(f'<div class="status-label">Next Step: {current_stage}</div>', unsafe_allow_html=True)
 
             # 4. 3段階評価ボタン
