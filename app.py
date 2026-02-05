@@ -10,7 +10,7 @@ from datetime import datetime, date
 
 # スプレッドシートの「列番号」の設定（A列=0, B列=1, C列=2...）
 COL_Q_NUM   = 3  # D列: 問題番号
-COL_IMG_URL = 2  # C列: 画像URL
+COL_IMG_URL = 1  # B列: 画像URL
 COL_LV1     = 5  # F列: 1回目 (Lv1)
 COL_LV2     = 6  # G列: 2回目 (Lv2)
 COL_LV3     = 7  # H列: 3回目 (Lv3)
