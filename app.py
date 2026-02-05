@@ -228,7 +228,7 @@ stats = {
 # サイドバーフィルタ
 with st.sidebar:
     st.header("⚙️ 設定")
-    min_score = st.slider("最低優先度", 0, 200, 80)
+    min_score = st.slider("最低優先度", 0, 100, 70)
 
 for i, row in df.iterrows():
     try:
