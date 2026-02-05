@@ -84,13 +84,14 @@ st.markdown("""
         height: 100%;
         background-color: #f8fafc; /* 画像背景色を追加 */
         border-radius: 8px;
+        min-height: 200px; /* PCでの高さ確保 */
     }
     
     div[data-testid="stImage"] img {
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 400px; /* ★修正: 高さをさらに緩和 */
+        max-height: 400px; /* PCでの最大高さ */
         width: auto !important;
         max-width: 100%;
     }
@@ -137,6 +138,30 @@ st.markdown("""
         font-weight: 800;
         color: white;
         margin-bottom: 12px;
+    }
+
+    /* =========================================
+       📱 スマホ対応 (レスポンシブデザイン)
+       ========================================= */
+    @media only screen and (max-width: 600px) {
+        /* カードの余白を少し詰める */
+        .card-content {
+            padding: 16px;
+        }
+        
+        /* 画像の最大高さをスマホ用に小さくする */
+        div[data-testid="stImage"] {
+            min-height: auto; /* 高さを自動調整 */
+            margin-bottom: 12px;
+        }
+        div[data-testid="stImage"] img {
+            max-height: 250px; /* スマホでは250pxまでに抑える */
+        }
+        
+        /* タイトル文字サイズ調整 */
+        .metric-value {
+            font-size: 24px;
+        }
     }
 
 </style>
@@ -288,8 +313,9 @@ else:
             <div class="card-header-bar" style="background-color: {border_color};"></div>
             <div class="card-content">""", unsafe_allow_html=True)
 
-        # ★ 修正: カラム比率を [1, 1.5] に拡大しました
-        col_img, col_info = st.columns([1, 1.5])
+        # ★ 修正: PCでのバランスを考慮して[1, 2]に設定
+        # スマホでは自動的に縦積みになります
+        col_img, col_info = st.columns([1, 2])
 
         # 左: 画像
         with col_img:
