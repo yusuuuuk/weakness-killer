@@ -5,17 +5,16 @@ from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime, date
 
 # ==========================================
-# ⚙️ 設定エリア（ここだけ確認してください！）
+# ⚙️ 設定エリア
 # ==========================================
 
 # スプレッドシートの「列番号」の設定（A列=0, B列=1, C列=2...）
-# ※「フォームの回答 1」シートの列順に合わせてください
 COL_Q_NUM   = 3  # D列: 問題番号
-COL_IMG_URL = 2  # C列: 画像URL（重要！ここがhttps~であること）
+COL_IMG_URL = 2  # C列: 画像URL
 COL_LV1     = 5  # F列: 1回目 (Lv1)
 COL_LV2     = 6  # G列: 2回目 (Lv2)
 COL_LV3     = 7  # H列: 3回目 (Lv3)
-COL_NEXT    = 8  # I列: スコア
+COL_SCORE   = 8  # I列: スコア（大きいほど優先）
 
 # ==========================================
 
@@ -39,15 +38,13 @@ try:
     
 except Exception as e:
     st.error(f"認証エラー: {e}")
-    st.info("Secretsの worksheet_name が正しいか確認してください（推奨: 'フォームの回答 1'）")
+    st.info("Secretsの worksheet_name が正しいか確認してください")
     st.stop()
 
 # --- 2. 関数定義 ---
 
 def get_data():
-    # 全データを取得
     all_values = sheet.get_all_values()
-    # ヘッダー(1行目)とデータ(2行目以降)を分離
     if len(all_values) < 2:
         return pd.DataFrame()
     headers = all_values[0]
@@ -55,18 +52,15 @@ def get_data():
     return df
 
 def convert_drive_url(url):
-    # GoogleドライブのURLを表示可能な形式に変換
     if not isinstance(url, str):
         return None
     if "drive.google.com" in url and "id=" in url:
-        # id=xxxxx の形式の場合
         try:
             file_id = url.split('id=')[1].split('&')[0]
             return f"https://drive.google.com/thumbnail?id={file_id}&sz=w1000"
         except:
             return url
     elif "drive.google.com" in url and "/d/" in url:
-        # /d/xxxxx/view の形式の場合
         try:
             file_id = url.split('/d/')[1].split('/')[0]
             return f"https://drive.google.com/thumbnail?id={file_id}&sz=w1000"
@@ -81,67 +75,56 @@ if df.empty:
     st.warning("データがありません。")
     st.stop()
 
-today = date.today()
 tasks = []
 
 # 行ごとにデータを処理
 for i, row in df.iterrows():
     try:
-        # 列数チェック（エラー防止）
-        if len(row) <= max(COL_Q_NUM, COL_IMG_URL, COL_NEXT):
+        # 列数チェック
+        if len(row) <= max(COL_Q_NUM, COL_IMG_URL, COL_SCORE):
             continue
 
         # データの取得
         q_num = row[COL_Q_NUM]
         raw_url = row[COL_IMG_URL]
         
-        # URLが「http」で始まっているか確認
-        if not str(raw_url).startswith("http"):
-            # URLじゃない場合（文字の場合）はスキップ、またはプレースホルダー
-            img_url = None
-        else:
+        # 画像URL変換
+        if str(raw_url).startswith("http"):
             img_url = convert_drive_url(raw_url)
+        else:
+            img_url = None
 
-        # チェックボックスの状態確認 ("TRUE" 文字列チェック)
+        # チェックボックスの状態確認
         lv1 = str(row[COL_LV1]).upper() == "TRUE"
         lv2 = str(row[COL_LV2]).upper() == "TRUE"
         lv3 = str(row[COL_LV3]).upper() == "TRUE"
         
-        # 次回日付の計算
-        next_date_str = str(row[COL_NEXT])
+        # スコア（優先度）の取得
+        # 日付計算ではなく、シートに入っている数字をそのまま使う
+        raw_score = row[COL_SCORE]
+        score = 0 # 初期値
         
-        days_diff = -999 # 初期値
-        
-        if next_date_str and "卒業" not in next_date_str:
-            try:
-                # 日付形式の揺らぎに対応 (yyyy/mm/dd または mm/dd)
-                if len(next_date_str.split('/')[0]) == 4:
-                    next_date = datetime.strptime(next_date_str, "%Y/%m/%d").date()
-                else:
-                    # 年がない場合は今年とする
-                    temp_date = datetime.strptime(next_date_str, "%m/%d").date()
-                    next_date = temp_date.replace(year=today.year)
-                
-                days_diff = (today - next_date).days
-            except:
-                days_diff = 0 # 日付エラー時は今日やることにする
+        try:
+            # 数値に変換できればそのままスコアにする
+            score = int(float(raw_score))
+        except:
+            # 数値じゃない（空欄や文字）場合は0扱い
+            score = 0
 
-        # 表示条件: Lv3未完了 かつ 卒業じゃない かつ 期限が来ている
-        is_graduated = lv3 or ("卒業" in next_date_str)
-        if not is_graduated and days_diff >= 0:
+        # 表示条件: Lv3(卒業)が未完了であればリストに入れる
+        if not lv3:
             tasks.append({
-                "index": i + 2, # スプレッドシートの行番号 (0始まり+ヘッダー分)
+                "index": i + 2, # スプレッドシートの行番号
                 "name": q_num,
                 "img": img_url,
-                "score": days_diff,
+                "score": score, # 取得したスコアをそのまま使用
                 "lv1": lv1, "lv2": lv2, "lv3": lv3
             })
 
     except Exception as e:
-        # エラー行はスキップ
         continue
 
-# 並び替え（スコアが高い＝滞納が長い順）
+# 並び替え（スコアが高い順 ＝ 大きい方が優先）
 tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 
 # --- 4. 画面表示 ---
@@ -161,14 +144,16 @@ else:
                     st.image(task["img"], use_container_width=True)
                 else:
                     st.warning("📷 画像なし")
-                    st.caption("※スプレッドシートのURL列を確認してください")
             
             with c2:
-                # 危険度表示
-                if task["score"] >= 3:
-                    st.error(f"🚨 危険度: Lv{task['score']} (滞納中)")
+                # 危険度表示（スコアが高いほど危険）
+                score_val = task["score"]
+                if score_val >= 100: # 基準はお好みで調整してください
+                    st.error(f"🚨 優先度: {score_val} (至急！)")
+                elif score_val >= 50:
+                    st.warning(f"⚠️ 優先度: {score_val}")
                 else:
-                    st.info(f"🟢 本日の課題")
+                    st.info(f"🟢 優先度: {score_val}")
                 
                 st.subheader(task["name"])
                 
@@ -187,7 +172,6 @@ else:
                 
                 # クリアボタン
                 if st.button(f"✅ クリア！", key=f"btn_{task['index']}"):
-                    # スプレッドシートを更新
                     sheet.update_cell(task["index"], check_col, True)
                     st.toast(f"『{task['name']}』をクリアしました！")
                     import time
