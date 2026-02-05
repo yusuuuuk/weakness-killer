@@ -259,7 +259,7 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # 🖥️ メインUI構築
 # ==========================================
 
-st.title("🔥 Weakness Killer")
+st.title("🎯 Weakness Traccker")
 st.caption("Strategic Learning Management System")
 
 # ダッシュボード (4カラム)
