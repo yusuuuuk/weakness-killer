@@ -55,7 +55,7 @@ st.markdown("""
         justify-content: center;
     }
     .metric-label { 
-        font-size: 11px; 
+        font-size: 15px; 
         color: #64748b; 
         font-weight: 700; 
         text-transform: uppercase;
@@ -113,7 +113,7 @@ st.markdown("""
     p, h1, h2, h3 { margin-bottom: 0px !important; }
 
     .info-label {
-        font-size: 11px;
+        font-size: 15px;
         color: #94a3b8;
         font-weight: 700;
         text-transform: uppercase;
