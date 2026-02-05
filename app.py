@@ -41,6 +41,37 @@ st.markdown("""
         padding-bottom: 3rem;
     }
 
+    /* --- メトリクスエリア（ダッシュボード） --- */
+    .metric-container {
+        background: white;
+        padding: 12px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .metric-label { 
+        font-size: 11px; 
+        color: #64748b; 
+        font-weight: 700; 
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+    }
+    .metric-value { 
+        font-size: 24px; 
+        color: #0f172a; 
+        font-weight: 800; 
+        line-height: 1.2;
+    }
+    .metric-value.danger { color: #ef4444; }
+    .metric-value.success { color: #10b981; }
+    .metric-value.info { color: #3b82f6; }
+
     /* --- カード本体 --- */
     .task-card {
         background-color: #ffffff;
@@ -129,10 +160,14 @@ st.markdown("""
     /* --- スマホ調整 --- */
     @media only screen and (max-width: 600px) {
         div[data-testid="stImage"] img {
-            max-height: 500px;
+            max-height: 180px;
         }
         [data-testid="column"] {
             padding: 0 !important;
+        }
+        /* メトリクスコンテナの余白調整 */
+        .metric-container {
+            margin-bottom: 8px;
         }
     }
 </style>
@@ -175,6 +210,12 @@ def convert_drive_url(url):
 df = get_data()
 tasks = []
 
+# 統計データの初期化
+stats = {
+    "total_active": 0, # 未卒業の総数
+    "graduated": 0,    # 卒業済み
+}
+
 # サイドバーフィルタ
 with st.sidebar:
     st.header("⚙️ 設定")
@@ -194,6 +235,13 @@ for i, row in df.iterrows():
         lv2 = str(row[COL_LV2_IDX]).upper() == "TRUE"
         lv3 = str(row[COL_LV3_IDX]).upper() == "TRUE"
 
+        # 統計集計（フィルタリング前に行う）
+        if lv3:
+            stats["graduated"] += 1
+        else:
+            stats["total_active"] += 1
+
+        # リスト追加条件（フィルタリング）
         if not lv3 and score >= min_score:
             tasks.append({
                 "index": i + 2,
@@ -212,13 +260,55 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # ==========================================
 
 st.title("🔥 Weakness Killer")
-st.caption(f"Priority > {min_score} | Tasks: {len(tasks)}")
+st.caption("Strategic Learning Management System")
+
+# ダッシュボード (4カラム)
+m1, m2, m3, m4 = st.columns(4)
+
+# 1. 今日の課題 (フィルタリング後の数)
+with m1:
+    st.markdown(f"""
+    <div class="metric-container">
+        <div class="metric-label">🔥 TODAY'S TASKS</div>
+        <div class="metric-value">{len(tasks)}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 2. 危険な課題 (表示中のタスクのうちスコア100以上)
+high_priority_count = sum(1 for t in tasks if t["score"] >= 100)
+with m2:
+    st.markdown(f"""
+    <div class="metric-container">
+        <div class="metric-label">🚨 DANGER</div>
+        <div class="metric-value danger">{high_priority_count}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 3. 未卒業の全弱点 (統計データから)
+with m3:
+    st.markdown(f"""
+    <div class="metric-container">
+        <div class="metric-label">📚 TOTAL ACTIVE</div>
+        <div class="metric-value info">{stats['total_active']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 4. 卒業済み (統計データから)
+with m4:
+    st.markdown(f"""
+    <div class="metric-container">
+        <div class="metric-label">🎓 GRADUATED</div>
+        <div class="metric-value success">{stats['graduated']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
 st.markdown("---")
 
 # タスクリスト
 if not tasks:
     st.balloons()
-    st.success("🎉 All weaknesses eliminated!")
+    st.success("🎉 All priority tasks completed!")
+    st.info(f"現在、未卒業の弱点は残り {stats['total_active']} 問です。サイドバーのフィルタを調整して復習しましょう！")
 else:
     # -------------------------------------------------------
     # 🖥️ グリッド表示ロジック (2列)
@@ -283,11 +373,11 @@ else:
                     """, unsafe_allow_html=True)
 
                     # ==========================================
-                    # 👇 ボタンを縦並びに変更 & 文字復活
+                    # 👇 ボタン (縦並び・ラベル付き)
                     # ==========================================
                     today_str = datetime.now().strftime('%Y/%m/%d')
                     
-                    # 🟢 余裕 (Full Width)
+                    # 🟢 余裕
                     if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
@@ -295,14 +385,14 @@ else:
                         time.sleep(1)
                         st.rerun()
                     
-                    # 🟡 微妙 (Full Width)
+                    # 🟡 微妙
                     if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast("Keep trying!")
                         time.sleep(1)
                         st.rerun()
                         
-                    # 🔴 敗北 (Full Width)
+                    # 🔴 敗北
                     if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast("Don't worry!")
