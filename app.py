@@ -63,7 +63,7 @@ st.markdown("""
         margin-bottom: 4px;
     }
     .metric-value { 
-        font-size: 24px; 
+        font-size: 20px; 
         color: #0f172a; 
         font-weight: 800; 
         line-height: 1.2;
