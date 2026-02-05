@@ -41,7 +41,7 @@ st.markdown("""
         padding-bottom: 3rem;
     }
     h1 {
-        font-family: 'Inter', sans-serif;
+        font-family: 'M PLUS Rounded 1c', sans-serif;
         font-size: 48px !important; /* 👈 ここでタイトルの大きさを変えられます */
         font-weight: 900 !important;
         letter-spacing: -2px !important;
