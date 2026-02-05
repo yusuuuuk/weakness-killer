@@ -41,8 +41,8 @@ st.markdown("""
         padding-bottom: 3rem;
     }
     h1 {
-        font-family: 'M PLUS Rounded 1c', sans-serif;
-        font-size: 48px !important; /* 👈 ここでタイトルの大きさを変えられます */
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-size: 40px !important; /* 👈 ここでタイトルの大きさを変えられます */
         font-weight: 900 !important;
         letter-spacing: -2px !important;
         color: #0f172a !important;
@@ -268,7 +268,7 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # 🖥️ メインUI構築
 # ==========================================
 
-st.title("🎯 反復学習")
+st.title("🎯 反復学習サポート")
 st.caption("Strategic Learning Management System")
 
 # ダッシュボード (4カラム)
