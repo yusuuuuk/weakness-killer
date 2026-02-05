@@ -74,7 +74,7 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 250px; /* PCでの高さ */
+        max-height: 500px; /* PCでの高さ */
         width: auto !important;
         max-width: 100%;
     }
@@ -255,7 +255,7 @@ else:
                     <div class="card-header-bar" style="background-color: {border_color};"></div>
                     <div class="card-content">""", unsafe_allow_html=True)
 
-                col_img, col_info = st.columns([1, 1.5])
+                col_img, col_info = st.columns([1, 1])
 
                 with col_img:
                     if task["img"]:
