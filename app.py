@@ -42,7 +42,7 @@ st.markdown("""
     }
     h1 {
         font-family: 'Zen Maru Gothic', sans-serif;
-        font-size: 40px !important; /* 👈 ここでタイトルの大きさを変えられます */
+        font-size: 36px !important; /* 👈 ここでタイトルの大きさを変えられます */
         font-weight: 900 !important;
         letter-spacing: -2px !important;
         color: #0f172a !important;
