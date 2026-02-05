@@ -11,6 +11,7 @@ import time
 
 # 📥 読み込み用（Pandasは0始まり: A=0, B=1, C=2...）
 COL_Q_NUM   = 2  # C列: 問題名
+COL_LAST_DATE = 3 # D列: 前回実施日（ここを表示に使います）
 COL_IMG_URL = 9  # J列: 画像URL（作業用列）
 COL_SCORE   = 8  # I列: スコア
 
@@ -20,7 +21,6 @@ COL_LV2_IDX = 6  # G列
 COL_LV3_IDX = 7  # H列
 
 # 📤 書き込み用（Gspreadは1始まり: A=1, B=2, C=3...）
-# ※ここを間違えるとズレるので注意！
 WRITE_COL_DATE = 4  # D列: 前回実施日（ここを更新します）
 WRITE_COL_LV1  = 6  # F列: Lv1チェック
 WRITE_COL_LV2  = 7  # G列: Lv2チェック
@@ -28,17 +28,84 @@ WRITE_COL_LV3  = 8  # H列: Lv3チェック
 
 # ==========================================
 
-# --- 1. アプリ設定 ---
-st.set_page_config(page_title="Weakness Killer", page_icon="🔥")
+# --- 1. アプリ設定 & CSSデザイン ---
+st.set_page_config(page_title="Weakness Killer", page_icon="🔥", layout="centered")
+
+# カスタムCSS（カードデザイン用）
+st.markdown("""
+<style>
+    /* 全体の背景 */
+    .stApp {
+        background-color: #f8fafc;
+    }
+    
+    /* カードのデザイン */
+    .task-card {
+        background-color: #ffffff;
+        padding: 24px;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f1f5f9;
+        margin-bottom: 24px;
+    }
+    
+    /* 問題名 */
+    .task-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+    
+    /* 日付表示 */
+    .task-date {
+        font-size: 14px;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+    
+    /* バッジ共通 */
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+    
+    /* 優先度バッジの色 */
+    .badge-danger { background-color: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
+    .badge-warning { background-color: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+    .badge-info { background-color: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
+
+    /* ステータス表示 */
+    .status-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #059669;
+        margin-bottom: 12px;
+    }
+    
+    /* 画像エリア */
+    .img-container {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🔥 Weakness Killer (算数)")
 
-# サイドバー（フィルタ）
+# サイドバー
 with st.sidebar:
     st.header("🔍 表示フィルタ")
-    # デフォルト80（高いものだけ表示）
     min_score = st.slider("最低優先度", 0, 200, 80)
     st.caption(f"スコア {min_score} 以上の問題を表示中")
-    st.info("💡 ヒント: スコアが高いほど「忘れている」危険な問題です。")
 
 # --- 2. Google Sheets 接続 ---
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -73,30 +140,29 @@ def convert_drive_url(url):
 df = get_data()
 tasks = []
 
-# データ解析
 for i, row in df.iterrows():
     try:
-        # 列数不足のエラー回避
-        if len(row) <= max(COL_Q_NUM, COL_IMG_URL, COL_SCORE, COL_LV3_IDX): continue
+        # 列数チェック
+        if len(row) <= max(COL_Q_NUM, COL_LAST_DATE, COL_IMG_URL, COL_SCORE, COL_LV3_IDX): continue
 
-        q_num = row[COL_Q_NUM]
-        raw_url = row[COL_IMG_URL]
+        q_num = row[COL_Q_NUM]     # 問題名 (C列)
+        last_date = row[COL_LAST_DATE] # 前回実施日 (D列)
+        raw_url = row[COL_IMG_URL] # 画像URL (J列)
         img_url = convert_drive_url(raw_url) if str(raw_url).startswith("http") else None
 
-        # スコア取得
         try: score = int(float(row[COL_SCORE]))
         except: score = 0
 
-        # チェックボックス状態
         lv1 = str(row[COL_LV1_IDX]).upper() == "TRUE"
         lv2 = str(row[COL_LV2_IDX]).upper() == "TRUE"
         lv3 = str(row[COL_LV3_IDX]).upper() == "TRUE"
 
-        # リスト追加条件: 卒業(Lv3)していない & スコア基準以上
+        # リスト追加条件
         if not lv3 and score >= min_score:
             tasks.append({
-                "index": i + 2, # 行番号(header+1)
+                "index": i + 2,
                 "name": q_num,
+                "date": last_date,
                 "img": img_url,
                 "score": score,
                 "lv1": lv1, "lv2": lv2, "lv3": lv3
@@ -110,89 +176,77 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 if not tasks:
     st.balloons()
     st.success(f"🎉 優先度 {min_score} 以上の課題は全て完了！完璧です！")
-    if min_score > 0:
-        st.caption("サイドバーのスライダーを下げると、隠れている課題が見つかるかも…？")
 else:
-    st.write(f"優先度 **{min_score}** 以上の課題: **{len(tasks)}** 問")
-    st.caption("自己評価に合わせてボタンを選んでください。スケジュールが自動調整されます。")
+    st.markdown(f"##### 優先度 {min_score} 以上の課題: {len(tasks)} 問")
     
     for task in tasks:
-        with st.container():
-            st.markdown("---")
-            c1, c2 = st.columns([1, 2])
+        # カードコンテナの開始（見た目を作るためのHTML）
+        st.markdown('<div class="task-card">', unsafe_allow_html=True)
+        
+        c1, c2 = st.columns([1, 1.5])
+        
+        # --- 左カラム: 画像 ---
+        with c1:
+            if task["img"]:
+                # 画像の角を丸くするためのコンテナ
+                st.markdown(f'<div class="img-container"><img src="{task["img"]}" style="width:100%"></div>', unsafe_allow_html=True)
+            else:
+                st.warning("📷 画像なし")
+
+        # --- 右カラム: 情報 & 操作 ---
+        with c2:
+            # 1. バッジ表示 (HTMLでスタイリング)
+            if task["score"] >= 100:
+                badge_html = f'<span class="badge badge-danger">🚨 優先度: {task["score"]}</span>'
+            elif task["score"] >= 50:
+                badge_html = f'<span class="badge badge-warning">⚠️ 優先度: {task["score"]}</span>'
+            else:
+                badge_html = f'<span class="badge badge-info">🟢 優先度: {task["score"]}</span>'
             
-            # --- 左カラム: 画像 ---
-            with c1:
-                if task["img"]:
-                    st.image(task["img"], use_container_width=True)
-                else:
-                    st.warning("📷 画像なし")
-                    st.caption("スプレッドシートのURLを確認")
+            st.markdown(badge_html, unsafe_allow_html=True)
+
+            # 2. 問題タイトルと日付
+            st.markdown(f'<div class="task-title">{task["name"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="task-date">📅 前回実施: {task["date"]}</div>', unsafe_allow_html=True)
+
+            # 3. 進捗ステータス判定
+            if task["lv2"]:
+                current_stage = "Lv3 (最終仕上げ)"
+                target_check_col = WRITE_COL_LV3
+            elif task["lv1"]:
+                current_stage = "Lv2 (定着確認)"
+                target_check_col = WRITE_COL_LV2
+            else:
+                current_stage = "Lv1 (初挑戦)"
+                target_check_col = WRITE_COL_LV1
             
-            # --- 右カラム: 操作 ---
-            with c2:
-                # 危険度バッジ
-                if task["score"] >= 100:
-                    st.error(f"🚨 優先度: {task['score']} (危険域)")
-                elif task["score"] >= 50:
-                    st.warning(f"⚠️ 優先度: {task['score']} (要復習)")
-                else:
-                    st.info(f"🟢 優先度: {task['score']}")
-                
-                st.subheader(task["name"])
-                
-                # 次のステップ判定
-                if task["lv2"]:
-                    current_stage = "Lv3 (最終仕上げ)"
-                    target_check_col = WRITE_COL_LV3
-                elif task["lv1"]:
-                    current_stage = "Lv2 (定着確認)"
-                    target_check_col = WRITE_COL_LV2
-                else:
-                    current_stage = "Lv1 (初挑戦)"
-                    target_check_col = WRITE_COL_LV1
-                
-                st.caption(f"Current Stage: **{current_stage}**")
-                
-                # ==========================================
-                # 🎮 3段階評価ボタン
-                # ==========================================
-                st.write("▼ 今日の手応えは？")
-                b1, b2, b3 = st.columns(3)
-                
-                today_str = datetime.now().strftime('%Y/%m/%d')
+            st.markdown(f'<div class="status-label">Next Step: {current_stage}</div>', unsafe_allow_html=True)
 
-                # 🟢 余裕 (Next Level)
-                with b1:
-                    if st.button("🟢 余裕!", key=f"ok_{task['index']}"):
-                        # 1. チェックを入れて進級
-                        sheet.update_cell(task["index"], target_check_col, True)
-                        # 2. 日付更新
-                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        
-                        st.balloons()
-                        st.toast("素晴らしい！次のレベルへ進みます🚀")
-                        time.sleep(1)
-                        st.rerun()
+            # 4. 3段階評価ボタン
+            b1, b2, b3 = st.columns(3)
+            today_str = datetime.now().strftime('%Y/%m/%d')
 
-                # 🟡 微妙 (Stay)
-                with b2:
-                    if st.button("🟡 微妙...", key=f"soso_{task['index']}"):
-                        # チェックは入れない（ステイ）
-                        # 日付だけ更新してリセット
-                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        
-                        st.toast("OK！同じレベルでもう一度やりましょう💪")
-                        time.sleep(1)
-                        st.rerun()
+            with b1:
+                if st.button("🟢 余裕", key=f"ok_{task['index']}", use_container_width=True):
+                    sheet.update_cell(task["index"], target_check_col, True)
+                    sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                    st.toast("Nice! 次のレベルへ🚀")
+                    time.sleep(1)
+                    st.rerun()
 
-                # 🔴 敗北 (Stay)
-                with b3:
-                    if st.button("🔴 敗北", key=f"bad_{task['index']}"):
-                        # チェック入れない
-                        # 日付だけ更新
-                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        
-                        st.error("ドンマイ！明日リベンジです🔥")
-                        time.sleep(1)
-                        st.rerun()
+            with b2:
+                if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
+                    sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                    st.toast("OK! 反復練習しましょう💪")
+                    time.sleep(1)
+                    st.rerun()
+
+            with b3:
+                if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
+                    sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                    st.toast("Don't worry! 明日また出題します🔥")
+                    time.sleep(1)
+                    st.rerun()
+        
+        # カードコンテナの終了
+        st.markdown('</div>', unsafe_allow_html=True)
