@@ -122,7 +122,7 @@ st.markdown("""
         margin-bottom: 2px;
     }
     .date-text {
-        font-size: 15px;
+        font-size: 20px;
         color: #334155;
         font-weight: 700;
         display: flex;
@@ -134,7 +134,7 @@ st.markdown("""
         display: inline-block;
         padding: 3px 10px;
         border-radius: 6px;
-        font-size: 11px;
+        font-size: 15px;
         font-weight: 800;
         color: white;
         margin-bottom: 4px;
