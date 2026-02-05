@@ -25,7 +25,7 @@ WRITE_COL_LV3  = 8  # H列: 更新用
 # ==========================================
 # 🎨 デザイン設定 & CSS
 # ==========================================
-st.set_page_config(page_title="Weakness Killer", page_icon="🔥", layout="wide")
+st.set_page_config(page_title="Weakness Tracker", page_icon="🎯", layout="wide")
 
 st.markdown("""
 <style>
