@@ -76,7 +76,7 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 250px; /* PCでの高さ制限 */
+        max-height: 500px; /* PCでの高さ制限 */
         width: auto !important;
         max-width: 100%;
     }
