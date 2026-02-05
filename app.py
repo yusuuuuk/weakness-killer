@@ -129,7 +129,7 @@ st.markdown("""
     /* --- スマホ調整 --- */
     @media only screen and (max-width: 600px) {
         div[data-testid="stImage"] img {
-            max-height: 180px;
+            max-height: 400px;
         }
         [data-testid="column"] {
             padding: 0 !important;
