@@ -160,7 +160,7 @@ st.markdown("""
     /* --- スマホ調整 --- */
     @media only screen and (max-width: 600px) {
         div[data-testid="stImage"] img {
-            max-height: 180px;
+            max-height: 500px;
         }
         [data-testid="column"] {
             padding: 0 !important;
@@ -263,7 +263,7 @@ st.title("🔥 Weakness Killer")
 st.caption("Strategic Learning Management System")
 
 # ダッシュボード (4カラム)
-m1, m2, m3, m4 = st.columns(4)
+m1, m2, m3 = st.columns(3)
 
 # 1. 今日の課題 (フィルタリング後の数)
 with m1:
@@ -284,17 +284,9 @@ with m2:
     </div>
     """, unsafe_allow_html=True)
 
-# 3. 未卒業の全弱点 (統計データから)
-with m3:
-    st.markdown(f"""
-    <div class="metric-container">
-        <div class="metric-label">📚 TOTAL ACTIVE</div>
-        <div class="metric-value info">{stats['total_active']}</div>
-    </div>
-    """, unsafe_allow_html=True)
 
 # 4. 卒業済み (統計データから)
-with m4:
+with m3:
     st.markdown(f"""
     <div class="metric-container">
         <div class="metric-label">🎓 GRADUATED</div>
