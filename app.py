@@ -265,8 +265,8 @@ else:
             <div class="card-header-bar" style="background-color: {border_color};"></div>
             <div class="card-content">""", unsafe_allow_html=True)
 
-        # ★ ここを修正: カラム比率を [1.5, 1] に変更し、画像を大きくしました
-        col_img, col_info = st.columns([1.5, 1])
+        # ★ ここを修正: カラム比率を [1, 1.5] に変更し、画像のサイズを抑えました
+        col_img, col_info = st.columns([1, 1.5])
 
         # 左: 画像
         with col_img:
