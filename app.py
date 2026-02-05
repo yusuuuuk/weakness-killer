@@ -40,6 +40,15 @@ st.markdown("""
         padding-top: 2rem;
         padding-bottom: 3rem;
     }
+    h1 {
+        font-family: 'Inter', sans-serif;
+        font-size: 48px !important; /* 👈 ここでタイトルの大きさを変えられます */
+        font-weight: 900 !important;
+        letter-spacing: -2px !important;
+        color: #0f172a !important;
+        margin-bottom: 0px !important;
+        padding-bottom: 0px !important;
+    }
 
     /* --- メトリクスエリア（ダッシュボード） --- */
     .metric-container {
