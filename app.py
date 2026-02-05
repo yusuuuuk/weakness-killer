@@ -259,7 +259,7 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # 🖥️ メインUI構築
 # ==========================================
 
-st.title("🎯 Weakness Tracker")
+st.title("🎯 反復学習アプリ")
 st.caption("Strategic Learning Management System")
 
 # ダッシュボード (4カラム)
@@ -269,7 +269,7 @@ m1, m2, m3 = st.columns(3)
 with m1:
     st.markdown(f"""
     <div class="metric-container">
-        <div class="metric-label">🔥 TODAY'S TASKS</div>
+        <div class="metric-label">🔥 今日の課題</div>
         <div class="metric-value">{len(tasks)}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -279,7 +279,7 @@ high_priority_count = sum(1 for t in tasks if t["score"] >= 100)
 with m2:
     st.markdown(f"""
     <div class="metric-container">
-        <div class="metric-label">🚨 DANGER</div>
+        <div class="metric-label">🚨 最優先</div>
         <div class="metric-value danger">{high_priority_count}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -289,7 +289,7 @@ with m2:
 with m3:
     st.markdown(f"""
     <div class="metric-container">
-        <div class="metric-label">🎓 GRADUATED</div>
+        <div class="metric-label">🎓 達成</div>
         <div class="metric-value success">{stats['graduated']}</div>
     </div>
     """, unsafe_allow_html=True)
