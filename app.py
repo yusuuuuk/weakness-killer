@@ -23,7 +23,7 @@ WRITE_COL_LV2  = 7  # G列: 更新用
 WRITE_COL_LV3  = 8  # H列: 更新用
 
 # ==========================================
-# 🎨 デザイン設定 & CSS
+# 🎨 デザイン設定 & CSS (コンパクト版)
 # ==========================================
 st.set_page_config(page_title="Weakness Killer", page_icon="🔥", layout="wide")
 
@@ -32,81 +32,72 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
     
     .stApp {
-        background-color: #f1f5f9; /* Slate-100 */
+        background-color: #f1f5f9;
         font-family: 'Inter', sans-serif;
     }
-
-    /* --- メトリクスエリア --- */
-    .metric-container {
-        background: white;
-        padding: 15px 20px;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        text-align: center;
-        border: 1px solid #e2e8f0;
+    
+    /* アプリ全体の上下余白を削減 */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
     }
-    .metric-label { font-size: 14px; color: #64748b; font-weight: 600; }
-    .metric-value { font-size: 28px; color: #0f172a; font-weight: 800; }
-    .metric-value.danger { color: #ef4444; }
 
     /* --- カード本体 --- */
     .task-card {
         background-color: #ffffff;
-        border-radius: 16px;
-        padding: 0; /* 内部でpadding調整 */
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        margin-bottom: 30px;
+        border-radius: 12px; /* 少し角丸を小さく */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px; /* カード間の隙間を削減 */
         border: 1px solid #e2e8f0;
         overflow: hidden;
-        transition: transform 0.2s;
-    }
-    .task-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
     /* --- カードヘッダー（優先度バー） --- */
     .card-header-bar {
-        height: 8px;
+        height: 6px; /* 細くする */
         width: 100%;
     }
 
-    /* --- コンテンツエリア --- */
+    /* --- コンテンツエリア (ここが重要) --- */
     .card-content {
-        padding: 24px;
+        padding: 16px; /* 余白を大幅削減 (24px -> 16px) */
     }
 
     /* --- 画像スタイル --- */
     div[data-testid="stImage"] {
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start; /* 上寄せにする */
         height: 100%;
-        background-color: #f8fafc; /* 画像背景色を追加 */
-        border-radius: 8px;
-        min-height: 200px; /* PCでの高さ確保 */
+        min-height: auto;
     }
     
     div[data-testid="stImage"] img {
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 400px; /* PCでの最大高さ */
+        max-height: 250px; /* PCでの高さ制限 */
         width: auto !important;
         max-width: 100%;
     }
 
+    /* --- テキスト要素の余白リセット --- */
+    p, h1, h2, h3 {
+        margin-bottom: 0px !important;
+    }
+
     /* --- 情報ラベル --- */
     .info-label {
-        font-size: 13px;
+        font-size: 11px; /* 小さく */
         color: #94a3b8;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        margin-bottom: 4px;
+        margin-top: 8px; /* 上に少し隙間 */
+        margin-bottom: 2px;
     }
     .date-text {
-        font-size: 16px;
+        font-size: 15px;
         color: #334155;
         font-weight: 700;
         display: flex;
@@ -114,53 +105,41 @@ st.markdown("""
         gap: 6px;
     }
 
+    /* --- ステージバッジ --- */
+    .stage-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 4px; /* 下の余白削減 */
+    }
+
     /* --- プログレスバー --- */
     .progress-track {
         background-color: #f1f5f9;
-        height: 10px;
+        height: 6px; /* 細く */
         border-radius: 999px;
-        margin: 12px 0 20px 0;
+        margin: 8px 0 16px 0; /* 上下の隙間を詰める */
         overflow: hidden;
-        position: relative;
     }
     .progress-fill {
         height: 100%;
         border-radius: 999px;
-        transition: width 0.5s ease;
-    }
-    
-    .stage-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 12px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 12px;
     }
 
-    /* =========================================
-       📱 スマホ対応 (レスポンシブデザイン)
-       ========================================= */
+    /* --- スマホ調整 --- */
     @media only screen and (max-width: 600px) {
-        /* カードの余白を少し詰める */
         .card-content {
-            padding: 16px;
-        }
-        
-        /* 画像の最大高さをスマホ用に小さくする */
-        div[data-testid="stImage"] {
-            min-height: auto; /* 高さを自動調整 */
-            margin-bottom: 12px;
+            padding: 12px; /* スマホでは更に詰める */
         }
         div[data-testid="stImage"] img {
-            max-height: 250px; /* スマホでは250pxまでに抑える */
+            max-height: 200px; /* スマホでの画像高さ */
         }
-        
-        /* タイトル文字サイズ調整 */
-        .metric-value {
-            font-size: 24px;
+        /* カラム間の隙間を詰める */
+        [data-testid="column"] {
+            padding: 0 !important;
         }
     }
 
@@ -187,12 +166,8 @@ def get_data():
     return pd.DataFrame(all_values[1:], columns=all_values[0])
 
 def convert_drive_url(url):
-    """
-    GoogleドライブのURLを直リンク(lh3.googleusercontent.com)に変換する
-    ※この形式はiPhone/Safariでの表示トラブルが最も少ないです
-    """
+    """GoogleドライブのURLを直リンク(lh3)に変換"""
     if not isinstance(url, str): return None
-    
     file_id = None
     if "drive.google.com" in url and "id=" in url:
         try: file_id = url.split('id=')[1].split('&')[0]
@@ -200,11 +175,8 @@ def convert_drive_url(url):
     elif "drive.google.com" in url and "/d/" in url:
         try: file_id = url.split('/d/')[1].split('/')[0]
         except: pass
-        
     if file_id:
-        # ★修正: lh3形式に変更 (サイズ指定なし=最大サイズ)
         return f"https://lh3.googleusercontent.com/d/{file_id}"
-        
     return url
 
 # --- データ処理 ---
@@ -215,20 +187,18 @@ tasks = []
 with st.sidebar:
     st.header("⚙️ 設定")
     min_score = st.slider("最低優先度", 0, 200, 80)
-    st.info("💡 iPhoneで画像が表示されない場合、Googleドライブのフォルダ共有設定を「リンクを知っている全員」に変更してください。")
 
 for i, row in df.iterrows():
     try:
         if len(row) <= max(COL_Q_NUM, COL_LAST_DATE, COL_IMG_URL, COL_SCORE, COL_LV3_IDX): continue
-
+        
+        # データ取得
         q_num = row[COL_Q_NUM]
         last_date = row[COL_LAST_DATE]
         raw_url = row[COL_IMG_URL]
         img_url = convert_drive_url(raw_url) if str(raw_url).startswith("http") else None
-        
         try: score = int(float(row[COL_SCORE]))
         except: score = 0
-        
         lv1 = str(row[COL_LV1_IDX]).upper() == "TRUE"
         lv2 = str(row[COL_LV2_IDX]).upper() == "TRUE"
         lv3 = str(row[COL_LV3_IDX]).upper() == "TRUE"
@@ -250,78 +220,51 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # 🖥️ メインUI構築
 # ==========================================
 
-# 1. ヘッダーエリア
-c1, c2, c3 = st.columns([2, 1, 1])
-with c1:
-    st.title("🔥 Weakness Killer")
-    st.caption("Strategic Learning Management System")
-
-# メトリクス表示
-total_tasks = len(tasks)
-high_priority = sum(1 for t in tasks if t["score"] >= 100)
-
-with c2:
-    st.markdown(f"""
-    <div class="metric-container">
-        <div class="metric-label">REMAINING TASKS</div>
-        <div class="metric-value">{total_tasks}</div>
-    </div>
-    """, unsafe_allow_html=True)
-with c3:
-    st.markdown(f"""
-    <div class="metric-container">
-        <div class="metric-label">HIGH PRIORITY</div>
-        <div class="metric-value danger">{high_priority}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+# ヘッダー
+st.title("🔥 Weakness Killer")
+st.caption(f"Priority > {min_score} | Tasks: {len(tasks)}")
 st.markdown("---")
 
-# 2. タスクリスト
+# タスクリスト
 if not tasks:
     st.balloons()
-    st.success("🎉 All weaknesses eliminated! Great job!")
+    st.success("🎉 All weaknesses eliminated!")
 else:
     for task in tasks:
         # ステータス判定
         if task["lv2"]:
-            stage_name = "Lv3: Final Check"
-            stage_color = "#3b82f6" # Blue
+            stage_name = "Lv3"
+            stage_color = "#3b82f6"
             progress_pct = "66%"
             target_check_col = WRITE_COL_LV3
         elif task["lv1"]:
-            stage_name = "Lv2: Review"
-            stage_color = "#8b5cf6" # Purple
+            stage_name = "Lv2"
+            stage_color = "#8b5cf6"
             progress_pct = "33%"
             target_check_col = WRITE_COL_LV2
         else:
-            stage_name = "Lv1: First Try"
-            stage_color = "#10b981" # Green
+            stage_name = "Lv1"
+            stage_color = "#10b981"
             progress_pct = "5%"
             target_check_col = WRITE_COL_LV1
             
-        # 優先度判定
-        if task["score"] >= 100:
-            border_color = "#ef4444" # Red
-        elif task["score"] >= 50:
-            border_color = "#f59e0b" # Orange
-        else:
-            border_color = "#10b981" # Green
+        # 優先度色
+        if task["score"] >= 100: border_color = "#ef4444"
+        elif task["score"] >= 50: border_color = "#f59e0b"
+        else: border_color = "#10b981"
 
         # --- カード開始 ---
         st.markdown(f"""<div class="task-card">
             <div class="card-header-bar" style="background-color: {border_color};"></div>
             <div class="card-content">""", unsafe_allow_html=True)
 
-        # ★ 修正: PCでのバランスを考慮して[1, 2]に設定
-        # スマホでは自動的に縦積みになります
+        # ★ 修正: 比率を [1, 2] に設定し、間延びを防止
         col_img, col_info = st.columns([1, 2])
 
         # 左: 画像
         with col_img:
             if task["img"]:
-                # Streamlit標準関数を使用
-                st.image(task["img"]) 
+                st.image(task["img"])
             else:
                 st.warning("No Image")
 
@@ -337,7 +280,7 @@ else:
             # 前回実施日
             display_date = task["date"] if task["date"] else "🆕 初挑戦"
             st.markdown(f"""
-            <div class="info-label">LAST REVIEWED</div>
+            <div class="info-label" style="margin-top:0;">LAST REVIEWED</div>
             <div class="date-text">📅 {display_date}</div>
             """, unsafe_allow_html=True)
 
@@ -349,28 +292,26 @@ else:
             """, unsafe_allow_html=True)
 
             # アクションボタン
-            st.markdown('<div class="info-label">SELF EVALUATION</div>', unsafe_allow_html=True)
             b1, b2, b3 = st.columns(3)
-            
             today_str = datetime.now().strftime('%Y/%m/%d')
             
             with b1:
                 if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
                     sheet.update_cell(task["index"], target_check_col, True)
                     sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                    st.toast("Level Up! 🚀")
+                    st.toast("Level Up!")
                     time.sleep(1)
                     st.rerun()
             with b2:
                 if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
                     sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                    st.toast("Review scheduled! 💪")
+                    st.toast("Keep trying!")
                     time.sleep(1)
                     st.rerun()
             with b3:
                 if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
                     sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                    st.toast("Don't worry, try again tomorrow! 🔥")
+                    st.toast("Don't worry!")
                     time.sleep(1)
                     st.rerun()
 
