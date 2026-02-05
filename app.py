@@ -11,11 +11,11 @@ from datetime import datetime, date
 # スプレッドシートの「列番号」の設定（A列=0, B列=1, C列=2...）
 # ※「フォームの回答 1」シートの列順に合わせてください
 COL_Q_NUM   = 3  # D列: 問題番号
-COL_IMG_URL = 4  # E列: 画像URL（重要！ここがhttps~であること）
+COL_IMG_URL = 2  # C列: 画像URL（重要！ここがhttps~であること）
 COL_LV1     = 5  # F列: 1回目 (Lv1)
 COL_LV2     = 6  # G列: 2回目 (Lv2)
 COL_LV3     = 7  # H列: 3回目 (Lv3)
-COL_NEXT    = 8  # I列: 次回リトライ日
+COL_NEXT    = 8  # I列: スコア
 
 # ==========================================
 
