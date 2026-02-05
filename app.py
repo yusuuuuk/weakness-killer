@@ -76,21 +76,12 @@ st.markdown("""
         padding: 24px;
     }
 
-    /* --- 画像 --- */
-    .img-frame {
+    /* --- 画像スタイル（Streamlit標準コンポーネント用） --- */
+    /* st.imageで表示される画像に角丸と枠線をつける */
+    div[data-testid="stImage"] img {
         border-radius: 12px;
-        overflow: hidden;
         border: 1px solid #e2e8f0;
-        background-color: #f8fafc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        aspect-ratio: 4/3; /* 比率固定 */
-    }
-    .img-frame img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain; /* 画像全体を表示 */
+        object-fit: cover;
     }
 
     /* --- 情報ラベル --- */
@@ -125,7 +116,6 @@ st.markdown("""
         border-radius: 999px;
         transition: width 0.5s ease;
     }
-    /* Lv1: 33%, Lv2: 66%, Lv3: 100% */
     
     .stage-badge {
         display: inline-flex;
@@ -212,7 +202,7 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # 🖥️ メインUI構築
 # ==========================================
 
-# 1. ヘッダーエリア（ダッシュボード風）
+# 1. ヘッダーエリア
 c1, c2, c3 = st.columns([2, 1, 1])
 with c1:
     st.title("🔥 Weakness Killer")
@@ -275,16 +265,14 @@ else:
             <div class="card-header-bar" style="background-color: {border_color};"></div>
             <div class="card-content">""", unsafe_allow_html=True)
 
-        col_img, col_info = st.columns([1, 1.5])
+        # ★ ここを修正: カラム比率を [1.5, 1] に変更し、画像を大きくしました
+        col_img, col_info = st.columns([1.5, 1])
 
         # 左: 画像
         with col_img:
             if task["img"]:
-                st.markdown(f"""
-                <div class="img-frame">
-                    <img src="{task["img"]}">
-                </div>
-                """, unsafe_allow_html=True)
+                # Streamlit標準関数を使用 (クリック拡大可能)
+                st.image(task["img"], use_container_width=True)
             else:
                 st.warning("No Image")
 
