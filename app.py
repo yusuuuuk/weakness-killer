@@ -76,21 +76,22 @@ st.markdown("""
         padding: 24px;
     }
 
-    /* --- 画像スタイル（重要修正） --- */
-    /* 縦長画像対策：高さを制限して、はみ出さないようにする */
+    /* --- 画像スタイル --- */
     div[data-testid="stImage"] {
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100%;
+        background-color: #f8fafc; /* 画像背景色を追加 */
+        border-radius: 8px;
     }
     
     div[data-testid="stImage"] img {
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 300px; /* ★修正: 180px -> 300px に緩和 */
-        width: auto !important; /* アスペクト比を維持 */
+        max-height: 400px; /* ★修正: 高さをさらに緩和 */
+        width: auto !important;
         max-width: 100%;
     }
 
@@ -161,13 +162,24 @@ def get_data():
     return pd.DataFrame(all_values[1:], columns=all_values[0])
 
 def convert_drive_url(url):
+    """
+    GoogleドライブのURLを直リンク(lh3.googleusercontent.com)に変換する
+    ※この形式はiPhone/Safariでの表示トラブルが最も少ないです
+    """
     if not isinstance(url, str): return None
+    
+    file_id = None
     if "drive.google.com" in url and "id=" in url:
-        try: return f"https://drive.google.com/thumbnail?id={url.split('id=')[1].split('&')[0]}&sz=w800"
-        except: return url
+        try: file_id = url.split('id=')[1].split('&')[0]
+        except: pass
     elif "drive.google.com" in url and "/d/" in url:
-        try: return f"https://drive.google.com/thumbnail?id={url.split('/d/')[1].split('/')[0]}&sz=w800"
-        except: return url
+        try: file_id = url.split('/d/')[1].split('/')[0]
+        except: pass
+        
+    if file_id:
+        # ★修正: lh3形式に変更 (サイズ指定なし=最大サイズ)
+        return f"https://lh3.googleusercontent.com/d/{file_id}"
+        
     return url
 
 # --- データ処理 ---
@@ -178,6 +190,7 @@ tasks = []
 with st.sidebar:
     st.header("⚙️ 設定")
     min_score = st.slider("最低優先度", 0, 200, 80)
+    st.info("💡 iPhoneで画像が表示されない場合、Googleドライブのフォルダ共有設定を「リンクを知っている全員」に変更してください。")
 
 for i, row in df.iterrows():
     try:
@@ -275,13 +288,13 @@ else:
             <div class="card-header-bar" style="background-color: {border_color};"></div>
             <div class="card-content">""", unsafe_allow_html=True)
 
-        # ★ 修正: カラム比率を [1, 2] に変更し、バランスを調整
-        col_img, col_info = st.columns([1, 2])
+        # ★ 修正: カラム比率を [1, 1.5] に拡大しました
+        col_img, col_info = st.columns([1, 1.5])
 
         # 左: 画像
         with col_img:
             if task["img"]:
-                # Streamlit標準関数を使用 (クリック拡大可能)
+                # Streamlit標準関数を使用
                 st.image(task["img"]) 
             else:
                 st.warning("No Image")
