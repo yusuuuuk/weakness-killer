@@ -76,12 +76,22 @@ st.markdown("""
         padding: 24px;
     }
 
-    /* --- 画像スタイル（Streamlit標準コンポーネント用） --- */
-    /* st.imageで表示される画像に角丸と枠線をつける */
+    /* --- 画像スタイル（重要修正） --- */
+    /* 縦長画像対策：高さを制限して、はみ出さないようにする */
+    div[data-testid="stImage"] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+    
     div[data-testid="stImage"] img {
-        border-radius: 12px;
+        border-radius: 8px;
         border: 1px solid #e2e8f0;
-        object-fit: cover;
+        object-fit: contain;
+        max-height: 180px; /* ここで高さを制限（約スマホ画面の1/4程度） */
+        width: auto !important; /* アスペクト比を維持 */
+        max-width: 100%;
     }
 
     /* --- 情報ラベル --- */
@@ -265,14 +275,15 @@ else:
             <div class="card-header-bar" style="background-color: {border_color};"></div>
             <div class="card-content">""", unsafe_allow_html=True)
 
-        # ★ ここを修正: カラム比率を [1, 3] に変更し、画像をさらに小さくしました
-        col_img, col_info = st.columns([1, 3])
+        # ★ 修正: カラム比率を [1, 4] に変更し、画像エリアを狭めました
+        col_img, col_info = st.columns([1, 4])
 
         # 左: 画像
         with col_img:
             if task["img"]:
-                # Streamlit標準関数を使用 (クリック拡大可能)
-                st.image(task["img"], use_container_width=True)
+                # use_container_width=True を使うとCSSで制御しにくい場合があるため
+                # ここは外してCSSのmax-heightに任せます
+                st.image(task["img"]) 
             else:
                 st.warning("No Image")
 
