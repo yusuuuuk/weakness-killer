@@ -269,7 +269,7 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # ==========================================
 st.markdown("""
     <h1 style='font-family: "Zen Maru Gothic", sans-serif; font-weight: 900; font-size: 48px; color: #0f172a; margin-bottom: 0;'>
-        🎯 Weakness Tracker
+        🎯 反復学習サポート
     </h1>
 """, unsafe_allow_html=True)
 st.title("🎯 反復学習サポート")
