@@ -2,20 +2,19 @@ import streamlit as st
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
 
 # ==========================================
 # ⚙️ 設定エリア
 # ==========================================
 
-# 読み込み用: 列番号（A=0, B=1, C=2, D=3...）
-COL_Q_NUM   = 3  # D列: 問題番号（※ここを書き換える場合、番号が消えるので注意！）
-COL_IMG_URL = 9  # J列: 画像URL（※作業用列）
+# スプレッドシートの「列番号」（A列=0, B列=1...）
+# ※ここに「生のURL（https://...）」がある列を指定してください！
+COL_Q_NUM   = 3  # D列: 問題番号
+COL_IMG_URL = 9  # J列: 画像URL（※先ほど作成した作業用列を指定！）
+COL_LV1     = 5  # F列: 1回目
+COL_LV2     = 6  # G列: 2回目
+COL_LV3     = 7  # H列: 3回目
 COL_SCORE   = 8  # I列: スコア
-
-# 🔥 書き込み設定（重要）
-# クリア時に「今日の日付」を書き込む列（1始まり: A=1, B=2, C=3, D=4...）
-COL_DATE_WRITE = 4  # 👈 「4」ならD列に書き込みます
 
 # ==========================================
 
@@ -26,6 +25,7 @@ st.title("🔥 Weakness Killer (算数)")
 # サイドバー設定
 with st.sidebar:
     st.header("🔍 表示フィルタ")
+    # ここで「80」をデフォルト値に設定しています
     min_score = st.slider("最低優先度（スコア）", min_value=0, max_value=200, value=80)
     st.caption(f"スコア {min_score} 以上の問題のみ表示中")
 
@@ -74,30 +74,36 @@ df = get_data()
 
 tasks = []
 
+# 行ごとに処理
 for i, row in df.iterrows():
     try:
-        # 必要な列があるかチェック
         if len(row) <= max(COL_Q_NUM, COL_IMG_URL, COL_SCORE): continue
 
         q_num = row[COL_Q_NUM]
         raw_url = row[COL_IMG_URL]
         
-        # 画像URL変換
+        # URL変換
         img_url = convert_drive_url(raw_url) if str(raw_url).startswith("http") else None
 
+        lv1 = str(row[COL_LV1]).upper() == "TRUE"
+        lv2 = str(row[COL_LV2]).upper() == "TRUE"
+        lv3 = str(row[COL_LV3]).upper() == "TRUE"
+        
         # スコア取得
         try:
             score = int(float(row[COL_SCORE]))
         except:
             score = 0
 
-        # フィルタリング
-        if score >= min_score:
+        # 🔥 フィルタリング条件 🔥
+        # Lv3未完了 かつ スコアが設定値(80)以上のみ追加
+        if not lv3 and score >= min_score:
             tasks.append({
-                "index": i + 2, # 行番号
+                "index": i + 2,
                 "name": q_num,
                 "img": img_url,
-                "score": score
+                "score": score,
+                "lv1": lv1, "lv2": lv2, "lv3": lv3
             })
 
     except Exception as e:
@@ -109,8 +115,10 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # --- 4. 画面表示 ---
 if not tasks:
     st.info(f"優先度 {min_score} 以上の課題はありません！")
+    if min_score > 0:
+        st.caption("サイドバーのスライダーを下げると、他の課題が見えるかもしれません。")
 else:
-    st.write(f"優先度 **{min_score}** 以上の課題: **{len(tasks)}** 問")
+    st.write(f"優先度 **{min_score}** 以上の激ヤバ課題: **{len(tasks)}** 問")
     
     for task in tasks:
         with st.container():
@@ -124,23 +132,25 @@ else:
                     st.warning("画像なし")
             
             with c2:
-                # 優先度表示
+                # 危険度表示
                 if task["score"] >= 80:
-                    st.error(f"🚨 優先度: {task['score']}")
+                    st.error(f"🚨 優先度: {task['score']} (至急！)")
                 else:
                     st.warning(f"⚠️ 優先度: {task['score']}")
                 
                 st.subheader(task["name"])
                 
+                # 進捗
+                if task["lv2"]: check_col = COL_LV3 + 1
+                elif task["lv1"]: check_col = COL_LV2 + 1
+                else: check_col = COL_LV1 + 1
+                
                 # クリアボタン
-                if st.button(f"✅ 完了 (日付更新)", key=f"btn_{task['index']}"):
-                    # 今日付を取得 (YYYY/MM/DD)
+                if st.button(f"✅ クリア！", key=f"btn_{task['index']}"):
                     today_str = datetime.now().strftime('%Y/%m/%d')
-                    
-                    # 指定した列(D列なら4)に日付を書き込む
+                    sheet.update_cell(task["index"], check_col, True)
                     sheet.update_cell(task["index"], COL_DATE_WRITE, today_str)
-                    
-                    st.toast(f"完了！日付を {today_str} に更新しました")
+                    st.toast(f"完了！")
                     import time
                     time.sleep(1)
                     st.rerun()
