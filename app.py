@@ -89,7 +89,7 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 180px; /* ここで高さを制限（約スマホ画面の1/4程度） */
+        max-height: 300px; /* ★修正: 180px -> 300px に緩和 */
         width: auto !important; /* アスペクト比を維持 */
         max-width: 100%;
     }
@@ -275,14 +275,13 @@ else:
             <div class="card-header-bar" style="background-color: {border_color};"></div>
             <div class="card-content">""", unsafe_allow_html=True)
 
-        # ★ 修正: カラム比率を [1, 4] に変更し、画像エリアを狭めました
-        col_img, col_info = st.columns([1, 4])
+        # ★ 修正: カラム比率を [1, 2] に変更し、バランスを調整
+        col_img, col_info = st.columns([1, 2])
 
         # 左: 画像
         with col_img:
             if task["img"]:
-                # use_container_width=True を使うとCSSで制御しにくい場合があるため
-                # ここは外してCSSのmax-heightに任せます
+                # Streamlit標準関数を使用 (クリック拡大可能)
                 st.image(task["img"]) 
             else:
                 st.warning("No Image")
