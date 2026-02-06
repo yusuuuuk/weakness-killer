@@ -230,10 +230,7 @@ tomorrow_str = (today_dt + timedelta(days=1)).strftime('%Y/%m/%d')
 # --- Header Section ---
 h_left, h_right = st.columns([4, 1])
 with h_left:
-    st.markdown(f"<h1>🎯 {selected_student} さんの学習シート</h1>", unsafe_allow_html=True)
-with h_right:
-    if st.button("🔄 切替/戻る", use_container_width=True, help="ログイン画面に戻ります"):
-        handle_logout()
+    st.markdown(f"<h1>🎯 {selected_student} さんの反復学習サポート</h1>", unsafe_allow_html=True)
 
 st.caption(f"こんにちは、{selected_student}さん。今日も一歩ずつ進んでいきましょう！")
 
