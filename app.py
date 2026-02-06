@@ -447,8 +447,14 @@ else:
                     
                     # 🟡 微妙 (維持)
                     if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
-                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        st.toast("OK！解けたけれど不安があるため、同じレベルでもう一度練習しましょう💪", icon="🔄")
+                        if stage_name == "Lv1":
+                            sheet.update_cell(task["index"], WRITE_COL_DATE, tomorrow_str)
+                            msg = "OK！少し間隔をあけて（中1日）、もう一度練習しましょう💪"
+                        else:
+                            sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
+                            msg = "OK！Lvは維持します。忘れないうちにまた復習しましょう💪"
+                        
+                        st.toast(msg, icon="🔄")
                         time.sleep(1)
                         st.rerun()
                         
