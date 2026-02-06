@@ -186,7 +186,7 @@ st.markdown("""
     }
     
     div[data-testid="stToast"] [data-testid="stToastIcon"] {
-        font-size: 24px !important;
+        font-size: 12px !important;
         line-height: 1.2 !important;
         margin-right: 14px !important;
         flex-shrink: 0 !important;
@@ -197,7 +197,7 @@ st.markdown("""
     }
 
     div[data-testid="stToast"] [data-testid="stMarkdownContainer"] p {
-        font-size: 16px !important;
+        font-size: 12px !important;
         font-weight: 700 !important;
         color: #1e293b !important;
         line-height: 1.5 !important; /* 行間を広めに確保 */
