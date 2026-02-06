@@ -2,16 +2,16 @@ import streamlit as st
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 # ==========================================
-# 設定エリア
+# ⚙️ 設定エリア
 # ==========================================
-COL_Q_NUM   = 2  # C列: 問題名
-COL_LAST_DATE = 3 # D列: 前回実施日
-COL_IMG_URL = 9  # J列: 画像URL
-COL_SCORE   = 8  # I列: スコア
+COL_Q_NUM     = 2  # C列: 問題名
+COL_LAST_DATE = 3  # D列: 前回実施日
+COL_IMG_URL   = 9  # J列: 画像URL
+COL_SCORE     = 8  # I列: スコア
 
 COL_LV1_IDX = 5  # F列
 COL_LV2_IDX = 6  # G列
@@ -23,13 +23,13 @@ WRITE_COL_LV2  = 7  # G列: 更新用
 WRITE_COL_LV3  = 8  # H列: 更新用
 
 # ==========================================
-#デザイン設定 & CSS
+# 🎨 デザイン設定 & CSS
 # ==========================================
 st.set_page_config(page_title="Weakness Tracker", page_icon="🎯", layout="wide")
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Zen+Maru+Gothic:wght@700;900&display=swap');
     
     .stApp {
         background-color: #f1f5f9;
@@ -40,9 +40,11 @@ st.markdown("""
         padding-top: 2rem;
         padding-bottom: 3rem;
     }
+
+    /* --- タイトルのデザイン調整 --- */
     h1 {
         font-family: 'Zen Maru Gothic', sans-serif;
-        font-size: 36px !important; /* 👈 ここでタイトルの大きさを変えられます */
+        font-size: 36px !important;
         font-weight: 900 !important;
         letter-spacing: -2px !important;
         color: #0f172a !important;
@@ -119,7 +121,7 @@ st.markdown("""
         max-width: 100%;
     }
 
-    p, h1, h2, h3 { margin-bottom: 0px !important; }
+    p, h2, h3 { margin-bottom: 0px !important; }
 
     .info-label {
         font-size: 15px;
@@ -179,6 +181,12 @@ st.markdown("""
             margin-bottom: 8px;
         }
     }
+    
+    /* --- Streamlitの標準UIを隠す --- */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    [data-testid="stToolbar"] {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -225,6 +233,11 @@ stats = {
     "graduated": 0,    # 卒業済み
 }
 
+# 日本時間の今日を取得 (サーバー時間はUTCなので+9時間)
+JST = timedelta(hours=9)
+today_date = (datetime.utcnow() + JST).date()
+today_str = (datetime.utcnow() + JST).strftime('%Y/%m/%d')
+
 # サイドバーフィルタ
 with st.sidebar:
     st.header("⚙️ 設定")
@@ -250,8 +263,28 @@ for i, row in df.iterrows():
         else:
             stats["total_active"] += 1
 
-        # リスト追加条件（フィルタリング）
-        if not lv3 and score >= min_score:
+        # ★今日やったかどうかを判定
+        is_today_done = False
+        if last_date:
+            try:
+                # 日付フォーマットの揺らぎ吸収 (yyyy/mm/dd or mm/dd)
+                if len(last_date.split('/')) == 3:
+                    ld_obj = datetime.strptime(last_date, '%Y/%m/%d').date()
+                elif len(last_date.split('/')) == 2:
+                    # 年がない場合は今年と仮定
+                    ld_obj = datetime.strptime(last_date, '%m/%d').date().replace(year=today_date.year)
+                else:
+                    ld_obj = None
+                
+                # 前回実施日が「今日」なら除外フラグを立てる
+                if ld_obj == today_date:
+                    is_today_done = True
+            except:
+                pass
+
+        # リスト追加条件
+        # 「卒業していない」かつ「スコア条件クリア」かつ「★今日やっていない」
+        if not lv3 and score >= min_score and not is_today_done:
             tasks.append({
                 "index": i + 2,
                 "name": q_num,
@@ -265,12 +298,19 @@ for i, row in df.iterrows():
 tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 
 # ==========================================
-# メインUI構築
+# 🖥️ メインUI構築
 # ==========================================
-st.title("🎯 反復学習サポート")
+
+# フォントを強制適用したタイトル
+st.markdown("""
+    <h1 style='font-family: "Zen Maru Gothic", sans-serif; font-weight: 900; font-size: 36px; color: #0f172a; margin-bottom: 0;'>
+        🎯 反復学習サポート
+    </h1>
+""", unsafe_allow_html=True)
+
 st.caption("Strategic Learning Management System")
 
-# ダッシュボード (4カラム)
+# ダッシュボード (3カラム)
 m1, m2, m3 = st.columns(3)
 
 # 1. 今日の課題 (フィルタリング後の数)
@@ -292,8 +332,7 @@ with m2:
     </div>
     """, unsafe_allow_html=True)
 
-
-# 4. 卒業済み (統計データから)
+# 3. 卒業済み (統計データから)
 with m3:
     st.markdown(f"""
     <div class="metric-container">
@@ -375,9 +414,8 @@ else:
                     # ==========================================
                     # 👇 ボタン (縦並び・ラベル付き)
                     # ==========================================
-                    today_str = datetime.now().strftime('%Y/%m/%d')
                     
-                    # 余裕
+                    # 🟢 余裕
                     if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
@@ -385,14 +423,14 @@ else:
                         time.sleep(1)
                         st.rerun()
                     
-                    # 微妙
+                    # 🟡 微妙
                     if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast("Keep trying!")
                         time.sleep(1)
                         st.rerun()
                         
-                    # 敗北
+                    # 🔴 敗北
                     if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast("Don't worry!")
