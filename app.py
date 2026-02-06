@@ -237,7 +237,7 @@ if not st.session_state.student_name:
     
     _, center_col, _ = st.columns([1, 2, 1])
     with center_col:
-        input_name = st.text_input("名前", placeholder="例：狩野", label_visibility="collapsed")
+        input_name = st.text_input("名前", placeholder="例：中村", label_visibility="collapsed")
         if st.button("ログイン", use_container_width=True):
             if input_name:
                 # 入力された名前の「タブ」が存在するかチェック
