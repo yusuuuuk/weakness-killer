@@ -233,7 +233,7 @@ if "student_name" not in st.session_state:
 if not st.session_state.student_name:
     st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
     st.markdown("<h1 style='text-align: center;'>🎯 Welcome</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #64748b;'>お名前を入力してください</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #64748b;'>お名前(苗字のみ)を入力してください</p>", unsafe_allow_html=True)
     
     _, center_col, _ = st.columns([1, 2, 1])
     with center_col:
