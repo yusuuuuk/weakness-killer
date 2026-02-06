@@ -336,12 +336,14 @@ st.caption("Strategic Learning Management System")
 # ★追加：自己評価の基準ガイド
 with st.expander("💡 評価のめやす（どのボタンを押す？）"):
     st.markdown("""
-    - **🟢 余裕** ： 見た瞬間に解放が浮かび、迷わず最後まで解けた！
-    - **🟡 微妙** ： 解けたけど時間がかかった。少し自信がない。
-    - **🔴 敗北** ： 解き方がわからなかった。間違えてしまった。
-    ---
-    ※「余裕」を押すと出題間隔がのび、「微妙・敗北」は近いうちに再出題されます。
-    """)
+    - **🟢 余裕** ： 見た瞬間に解法が浮かび、迷わず解けた！ 
+        - → <span style='color:#10b981; font-weight:bold;'>Lvが進み、次は数日〜1ヶ月後に出ます。</span>
+    - **🟡 微妙** ： 解けたけど時間がかかった。少し自信がない。 
+        - → <span style='color:#f59e0b; font-weight:bold;'>Lvは維持。忘れないうちに数日後に再出題されます。</span>
+    - **🔴 敗北** ： 解き方がわからなかった。間違えてしまった。 
+        - → <span style='color:#ef4444; font-weight:bold;'>Lvが下がるか、明日すぐリベンジ出題されます。</span>
+    """, unsafe_allow_html=True)
+
 
 # ダッシュボード
 m1, m2, m3 = st.columns(3)
