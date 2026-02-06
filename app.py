@@ -426,7 +426,7 @@ else:
                     display_date = task["date"] if task["date"] else "🆕 初挑戦"
                     st.markdown(f"""
                     <div class="info-label" style="margin-top:0;">LAST REVIEWED</div>
-                    <div class="date-text">📅前回 {display_date}</div>
+                    <div class="date-text">📅     {display_date}</div>
                     """, unsafe_allow_html=True)
 
                     st.markdown(f"""
