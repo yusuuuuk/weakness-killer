@@ -443,7 +443,7 @@ else:
                     if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        st.toast(f"ナイス！見た瞬間に解法が浮かんだので、次のレベル({stage_name}クリア)へ進みます🚀", icon="🎉")
+                        st.toast(f"ナイス！次のレベル({stage_name}クリア)へ進みます🚀", icon="🎉")
                         time.sleep(1)
                         st.rerun()
                     
