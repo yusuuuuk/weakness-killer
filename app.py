@@ -168,11 +168,11 @@ if "student_name" not in st.session_state:
 if not st.session_state.student_name:
     st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
     st.markdown("<h1 style='text-align: center; font-size: 48px !important;'>🎯 Welcome</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #64748b; font-size: 18px;'>お名前を入力して開始しましょう</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #64748b; font-size: 18px;'>お名前(苗字)を入力して開始しましょう</p>", unsafe_allow_html=True)
     
     _, center_col, _ = st.columns([1, 1.5, 1])
     with center_col:
-        input_name = st.text_input("名前", placeholder="例：狩野", label_visibility="collapsed")
+        input_name = st.text_input("名前", placeholder="例：中村", label_visibility="collapsed")
         if st.button("ログインする", use_container_width=True):
             if input_name:
                 try:
@@ -232,7 +232,7 @@ h_left, h_right = st.columns([4, 1])
 with h_left:
     st.markdown(f"<h1>🎯 {selected_student} さんの反復学習サポート</h1>", unsafe_allow_html=True)
 
-st.caption(f"こんにちは、{selected_student}さん。今日も一歩ずつ進んでいきましょう！")
+st.caption(f"Hello、{selected_student}さん。今日も一歩ずつ進んでいきましょう！")
 
 # --- Process Data ---
 with st.sidebar:
