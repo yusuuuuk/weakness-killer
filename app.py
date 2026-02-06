@@ -259,7 +259,7 @@ for i, row in df.iterrows():
                 if len(last_date.split('/')) == 3: ld_obj = datetime.strptime(last_date, '%Y/%m/%d').date()
                 elif len(last_date.split('/')) == 2: ld_obj = datetime.strptime(last_date, '%m/%d').date().replace(year=today_date.year)
                 else: ld_obj = None
-                if ld_obj == today_date: is_today_done = True
+                if ld_obj >= today_date: is_today_done = True
             except: pass
 
         if not lv3 and score >= min_score and not is_today_done:
