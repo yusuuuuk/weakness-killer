@@ -168,38 +168,42 @@ st.markdown("""
         margin-bottom: 4px;
     }
 
-    /* --- トースト通知（st.toast）を見やすく修正 --- */
+    /* --- トースト通知（st.toast）の完全修正版 --- */
     div[data-testid="stToast"] {
         background-color: #ffffff !important;
         border: 2px solid #3b82f6 !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
         opacity: 1 !important;
-        padding: 12px 20px !important;
+        padding: 16px 20px !important;
         border-radius: 12px !important;
         max-width: 450px !important;
         width: auto !important;
-        height: auto !important; /* 自動で広がるように修正 */
-        min-height: auto !important; /* 最小高さの制限を解除 */
+        height: auto !important;
+        min-height: auto !important;
         display: flex !important;
-        /* アイコンがでかくなるのを防ぐため align-items を flex-start に変更 */
-        align-items: flex-start !important; 
+        align-items: flex-start !important;
+        overflow: visible !important;
     }
     
-    /* アイコン自体のサイズと位置を固定 */
     div[data-testid="stToast"] [data-testid="stToastIcon"] {
-        font-size: 12px !important; /* アイコンの大きさを指定 */
-        line-height: 1.4 !important;
-        margin-right: 12px !important;
-        flex-shrink: 0 !important; /* アイコンが圧縮されないように固定 */
+        font-size: 24px !important;
+        line-height: 1.2 !important;
+        margin-right: 14px !important;
+        flex-shrink: 0 !important;
+    }
+
+    div[data-testid="stToast"] [data-testid="stMarkdownContainer"] {
+        flex-grow: 1 !important;
     }
 
     div[data-testid="stToast"] [data-testid="stMarkdownContainer"] p {
-        font-size: 12px !important;
+        font-size: 16px !important;
         font-weight: 700 !important;
         color: #1e293b !important;
-        line-height: 1.4 !important;
+        line-height: 1.5 !important; /* 行間を広めに確保 */
         margin: 0 !important;
         padding: 0 !important;
+        white-space: normal !important;
     }
 
     /* --- スマホ調整 --- */
@@ -322,12 +326,22 @@ tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 # ==========================================
 # メインUI構築
 # ==========================================
-st.markdown("""
+st.markdown(f"""
     <h1 style='font-family: "Zen Maru Gothic", sans-serif; font-weight: 900; font-size: 36px; color: #0f172a; margin-bottom: 0;'>
         🎯 反復学習サポート
     </h1>
 """, unsafe_allow_html=True)
 st.caption("Strategic Learning Management System")
+
+# ★追加：自己評価の基準ガイド
+with st.expander("💡 評価のめやす（どのボタンを押す？）"):
+    st.markdown("""
+    - **🟢 余裕** ： 見た瞬間に解法が浮かび、迷わず最後まで解けた！
+    - **🟡 微妙** ： 解けたけど時間がかかった。少し自信がない。
+    - **🔴 敗北** ： 解き方がわからなかった。間違えてしまった。
+    ---
+    ※「余裕」を押すと出題間隔がのび、「微妙・敗北」は近いうちに再出題されます。
+    """)
 
 # ダッシュボード
 m1, m2, m3 = st.columns(3)
@@ -359,7 +373,7 @@ st.markdown("---")
 if not tasks:
     st.balloons()
     st.success("🎉 All priority tasks completed!")
-    #st.info(f"現在、未卒業の弱点は残り {stats['total_active']} 問です。サイドバーのフィルタを調整して復習しましょう！")
+    st.info(f"現在、未卒業の弱点は残り {stats['total_active']} 問です。サイドバーのフィルタを調整して復習しましょう！")
 else:
     rows = [tasks[i:i + 2] for i in range(0, len(tasks), 2)]
 
@@ -420,41 +434,36 @@ else:
                     """, unsafe_allow_html=True)
 
                     # ==========================================
-                    # 👇 ボタンアクション (降格システム実装)
+                    # 👇 ボタンアクション (ヘルプ説明を追加)
                     # ==========================================
-                    today_str = datetime.now().strftime('%Y/%m/%d')
                     
                     # 🟢 余裕 (進級)
-                    if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
+                    if st.button("🟢 余裕", key=f"easy_{task['index']}", help="見た瞬間に解法が浮かび、迷わず解けた場合に選びましょう！", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        st.toast(f"ナイス！次のレベル({stage_name}クリア)へ進みます🚀", icon="🎉")
+                        st.toast(f"ナイス！見た瞬間に解法が浮かんだので、次のレベル({stage_name}クリア)へ進みます🚀", icon="🎉")
                         time.sleep(1)
                         st.rerun()
                     
                     # 🟡 微妙 (維持)
-                    if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
+                    if st.button("🟡 微妙", key=f"soso_{task['index']}", help="解けたけれど時間がかかったり、少し自信がない場合に選びましょう。", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        st.toast("OK！同じレベルでもう一度練習しましょう💪", icon="🔄")
+                        st.toast("OK！解けたけれど不安があるため、同じレベルでもう一度練習しましょう💪", icon="🔄")
                         time.sleep(1)
                         st.rerun()
                         
                     # 🔴 敗北 (降格)
-                    if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
-                        # 日付は更新する（今日やったことにはなる）
+                    if st.button("🔴 敗北", key=f"bad_{task['index']}", help="解き方がわからなかったり、間違えてしまった場合に選びましょう。", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         
-                        # 降格処理: 今いるレベルの1つ前のチェックボックスを外す
-                        demotion_msg = "ドンマイ！また明日復習しましょう🔥"
+                        demotion_msg = "ドンマイ！今は解けなかったので、また明日復習しましょう🔥"
                         
-                        if task["lv2"]: # 今Lv3挑戦中 -> Lv2挑戦中へ (Lv2チェックを外す)
+                        if task["lv2"]: 
                             sheet.update_cell(task["index"], WRITE_COL_LV2, "FALSE")
-                            demotion_msg = "Lv2に戻って基礎を固め直します！🛡️"
-                        elif task["lv1"]: # 今Lv2挑戦中 -> Lv1挑戦中へ (Lv1チェックを外す)
+                            demotion_msg = "今は解けなかったので、Lv2に戻って基礎を固め直しましょう！🛡️"
+                        elif task["lv1"]: 
                             sheet.update_cell(task["index"], WRITE_COL_LV1, "FALSE")
-                            demotion_msg = "Lv1に戻ってやり直しましょう！🌱"
-                        
-                        # Lv1の場合は下がりようがないので、そのまま（次回は明日出題される）
+                            demotion_msg = "今は解けなかったので、Lv1に戻ってやり直しましょう！🌱"
                         
                         st.toast(demotion_msg, icon="📉")
                         time.sleep(1)
