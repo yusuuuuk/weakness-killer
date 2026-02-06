@@ -181,13 +181,23 @@ st.markdown("""
         height: auto !important; /* 自動で広がるように修正 */
         min-height: auto !important; /* 最小高さの制限を解除 */
         display: flex !important;
-        align-items: center !important;
+        /* アイコンがでかくなるのを防ぐため align-items を flex-start に変更 */
+        align-items: flex-start !important; 
     }
+    
+    /* アイコン自体のサイズと位置を固定 */
+    div[data-testid="stToast"] [data-testid="stToastIcon"] {
+        font-size: 12px !important; /* アイコンの大きさを指定 */
+        line-height: 1.4 !important;
+        margin-right: 12px !important;
+        flex-shrink: 0 !important; /* アイコンが圧縮されないように固定 */
+    }
+
     div[data-testid="stToast"] [data-testid="stMarkdownContainer"] p {
         font-size: 12px !important;
         font-weight: 700 !important;
         color: #1e293b !important;
-        line-height: 1.4 !important; /* 行間を詰めつつ重ならない設定 */
+        line-height: 1.4 !important;
         margin: 0 !important;
         padding: 0 !important;
     }
