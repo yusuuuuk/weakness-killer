@@ -171,16 +171,19 @@ st.markdown("""
     /* --- トースト通知（st.toast）を見やすく修正 --- */
     div[data-testid="stToast"] {
         background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 2px solid #3b82f6 !important; /* 青い枠線で強調 */
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
         opacity: 1 !important;
-        padding: 16px !important;
+        padding: 20px !important; /* 余白を少し広げた */
         border-radius: 12px !important;
+        max-width: 400px !important; /* 幅が広がりすぎないように制限 */
+        height: auto !important; /* 高さは内容に合わせる */
     }
     div[data-testid="stToast"] p {
         font-size: 16px !important;
         font-weight: 700 !important;
         color: #1e293b !important;
+        line-height: 1.5 !important; /* 2行になっても重ならないように行間を確保 */
     }
 
     /* --- スマホ調整 --- */
@@ -340,7 +343,7 @@ st.markdown("---")
 if not tasks:
     st.balloons()
     st.success("🎉 All priority tasks completed!")
-    st.info(f"現在、未卒業の弱点は残り {stats['total_active']} 問です。サイドバーのフィルタを調整して復習しましょう！")
+    #st.info(f"現在、未卒業の弱点は残り {stats['total_active']} 問です。サイドバーのフィルタを調整して復習しましょう！")
 else:
     rows = [tasks[i:i + 2] for i in range(0, len(tasks), 2)]
 
