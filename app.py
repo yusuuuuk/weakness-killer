@@ -171,19 +171,25 @@ st.markdown("""
     /* --- トースト通知（st.toast）を見やすく修正 --- */
     div[data-testid="stToast"] {
         background-color: #ffffff !important;
-        border: 2px solid #3b82f6 !important; /* 青い枠線で強調 */
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        border: 2px solid #3b82f6 !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2) !important;
         opacity: 1 !important;
-        padding: 20px !important; /* 余白を少し広げた */
+        padding: 12px 20px !important;
         border-radius: 12px !important;
-        max-width: 400px !important; /* 幅が広がりすぎないように制限 */
-        height: auto !important; /* 高さは内容に合わせる */
+        max-width: 450px !important;
+        width: auto !important;
+        height: auto !important; /* 自動で広がるように修正 */
+        min-height: auto !important; /* 最小高さの制限を解除 */
+        display: flex !important;
+        align-items: center !important;
     }
-    div[data-testid="stToast"] p {
+    div[data-testid="stToast"] [data-testid="stMarkdownContainer"] p {
         font-size: 16px !important;
         font-weight: 700 !important;
         color: #1e293b !important;
-        line-height: 1.5 !important; /* 2行になっても重ならないように行間を確保 */
+        line-height: 1.4 !important; /* 行間を詰めつつ重ならない設定 */
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     /* --- スマホ調整 --- */
