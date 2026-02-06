@@ -312,7 +312,7 @@ else:
                         st.toast(f"ナイス！出題間隔をあけます🚀", icon="🎉")
                         time.sleep(1); st.rerun()
                     if st.button("🟡 微妙", key=f"s_{task['index']}", use_container_width=True):
-                        sheet.update_cell(task["index"], WRITE_COL_DATE, tomorrow_str if stage_name=="Lv1" else today_str)
+                        sheet.update_cell(task["index"], WRITE_COL_DATE, today_str if stage_name=="Lv1" else today_str)
                         st.toast("OK！忘れないうちにまた復習しましょう💪", icon="🔄")
                         time.sleep(1); st.rerun()
                     if st.button("🔴 敗北", key=f"b_{task['index']}", use_container_width=True):
