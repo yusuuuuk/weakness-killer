@@ -6,7 +6,7 @@ from datetime import datetime
 import time
 
 # ==========================================
-# ⚙️ 設定エリア
+# 設定エリア
 # ==========================================
 COL_Q_NUM   = 2  # C列: 問題名
 COL_LAST_DATE = 3 # D列: 前回実施日
@@ -23,7 +23,7 @@ WRITE_COL_LV2  = 7  # G列: 更新用
 WRITE_COL_LV3  = 8  # H列: 更新用
 
 # ==========================================
-# 🎨 デザイン設定 & CSS
+#デザイン設定 & CSS
 # ==========================================
 st.set_page_config(page_title="Weakness Tracker", page_icon="🎯", layout="wide")
 
@@ -265,7 +265,7 @@ for i, row in df.iterrows():
 tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 
 # ==========================================
-# 🖥️ メインUI構築
+# メインUI構築
 # ==========================================
 st.title("🎯 反復学習サポート")
 st.caption("Strategic Learning Management System")
@@ -377,7 +377,7 @@ else:
                     # ==========================================
                     today_str = datetime.now().strftime('%Y/%m/%d')
                     
-                    # 🟢 余裕
+                    # 余裕
                     if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
@@ -385,14 +385,14 @@ else:
                         time.sleep(1)
                         st.rerun()
                     
-                    # 🟡 微妙
+                    # 微妙
                     if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast("Keep trying!")
                         time.sleep(1)
                         st.rerun()
                         
-                    # 🔴 敗北
+                    # 敗北
                     if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast("Don't worry!")
