@@ -6,25 +6,24 @@ from datetime import datetime, timedelta
 import time
 
 # ==========================================
-# ⚙️ 設定エリア
+# ⚙️ Configuration Area
 # ==========================================
-# ※タブを分けるため、COL_STUDENT（A列の名前チェック）は不要になります
-COL_Q_NUM     = 2  # C列: 問題名
-COL_LAST_DATE = 3  # D列: 前回実施日
-COL_IMG_URL   = 9  # J列: 画像URL
-COL_SCORE     = 8  # I列: スコア
+COL_Q_NUM     = 2  # Column C: Question Name
+COL_LAST_DATE = 3  # Column D: Last Reviewed Date
+COL_IMG_URL   = 9  # Column J: Image URL
+COL_SCORE     = 8  # Column I: Priority Score
 
-COL_LV1_IDX = 5  # F列
-COL_LV2_IDX = 6  # G列
-COL_LV3_IDX = 7  # H列
+COL_LV1_IDX = 5  # Column F
+COL_LV2_IDX = 6  # Column G
+COL_LV3_IDX = 7  # Column H
 
-WRITE_COL_DATE = 4  # D列: 更新用
-WRITE_COL_LV1  = 6  # F列: 更新用
-WRITE_COL_LV2  = 7  # G列: 更新用
-WRITE_COL_LV3  = 8  # H列: 更新用
+WRITE_COL_DATE = 4  # Column D: Update Date
+WRITE_COL_LV1  = 6  # Column F: Update Lv1
+WRITE_COL_LV2  = 7  # Column G: Update Lv2
+WRITE_COL_LV3  = 8  # Column H: Update Lv3
 
 # ==========================================
-# 🎨 デザイン設定 & CSS
+# 🎨 Design & CSS
 # ==========================================
 st.set_page_config(page_title="Personal Learning Tracker", page_icon="🎯", layout="wide")
 
@@ -44,12 +43,19 @@ st.markdown("""
 
     h1 {
         font-family: 'Zen Maru Gothic', sans-serif;
-        font-size: 36px !important;
+        font-size: 32px !important;
         font-weight: 900 !important;
-        letter-spacing: -2px !important;
+        letter-spacing: -1px !important;
         color: #0f172a !important;
         margin-bottom: 0px !important;
-        padding-bottom: 0px !important;
+    }
+
+    /* Header area with student name and switch button */
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
     }
 
     .metric-container {
@@ -65,22 +71,19 @@ st.markdown("""
         justify-content: center;
     }
     .metric-label { 
-        font-size: 15px; 
+        font-size: 14px; 
         color: #64748b; 
         font-weight: 700; 
         text-transform: uppercase;
-        letter-spacing: 0.05em;
         margin-bottom: 4px;
     }
     .metric-value { 
         font-size: 20px; 
         color: #0f172a; 
         font-weight: 800; 
-        line-height: 1.2;
     }
     .metric-value.danger { color: #ef4444; }
     .metric-value.success { color: #10b981; }
-    .metric-value.info { color: #3b82f6; }
 
     .task-card {
         background-color: #ffffff;
@@ -92,125 +95,51 @@ st.markdown("""
         height: 100%;
     }
 
-    .card-header-bar {
-        height: 6px;
-        width: 100%;
-    }
+    .card-header-bar { height: 6px; width: 100%; }
+    .card-content { padding: 16px; }
 
-    .card-content {
-        padding: 16px;
-    }
-
-    div[data-testid="stImage"] {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        height: 100%;
-        min-height: auto;
-    }
-    
     div[data-testid="stImage"] img {
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 500px; 
+        max-height: 450px; 
         width: auto !important;
-        max-width: 100%;
-    }
-
-    p, h2, h3 { margin-bottom: 0px !important; }
-
-    .info-label {
-        font-size: 15px;
-        color: #94a3b8;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-top: 8px;
-        margin-bottom: 2px;
-    }
-    .date-text {
-        font-size: 20px;
-        color: #334155;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 6px;
     }
 
     .stage-badge {
         display: inline-block;
         padding: 3px 10px;
         border-radius: 6px;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 800;
         color: white;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
     }
 
-    .progress-track {
-        background-color: #f1f5f9;
-        height: 6px;
-        border-radius: 999px;
-        margin: 8px 0 16px 0;
-        overflow: hidden;
-    }
-    .progress-fill {
-        height: 100%;
-        border-radius: 999px;
-    }
-    
-    .stButton button {
-        margin-bottom: 4px;
-    }
+    .info-label { font-size: 13px; color: #94a3b8; font-weight: 700; margin-top: 8px; }
+    .date-text { font-size: 18px; color: #334155; font-weight: 700; }
 
+    /* Toast notification styling */
     div[data-testid="stToast"] {
         background-color: #ffffff !important;
         border: 2px solid #3b82f6 !important;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-        opacity: 1 !important;
-        padding: 16px 20px !important;
+        padding: 16px !important;
         border-radius: 12px !important;
-        max-width: 450px !important;
-        width: auto !important;
         height: auto !important;
         min-height: 80px !important;
-        display: flex !important;
-        align-items: flex-start !important;
-        overflow: visible !important;
-    }
-    
-    div[data-testid="stToast"] [data-testid="stToastIcon"] {
-        font-size: 24px !important;
-        line-height: 1.2 !important;
-        margin-right: 14px !important;
-        flex-shrink: 0 !important;
-    }
-
-    div[data-testid="stToast"] [data-testid="stMarkdownContainer"] p {
-        font-size: 16px !important;
-        font-weight: 700 !important;
-        color: #1e293b !important;
-        line-height: 1.5 !important; 
-        margin: 0 !important;
-        padding: 0 !important;
-        white-space: normal !important;
     }
 
     @media only screen and (max-width: 600px) {
-        div[data-testid="stImage"] img { max-height: 500px; }
-        [data-testid="column"] { padding: 0 !important; }
+        h1 { font-size: 24px !important; }
         .metric-container { margin-bottom: 8px; }
     }
     
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    [data-testid="stToolbar"] {visibility: hidden;}
+    #MainMenu, footer, header, [data-testid="stToolbar"] {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# --- Google Sheets 接続準備 ---
+# --- Google Sheets Connection ---
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds_dict = dict(st.secrets["gcp_service_account"])
 creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
@@ -219,28 +148,33 @@ sheet_url = st.secrets["spreadsheet"]["url"]
 spreadsheet = client.open_by_url(sheet_url)
 
 # ==========================================
-# 👥 認証ロジック (タブ名で判定)
+# 👥 Auth & Navigation Logic
 # ==========================================
 
-# 1. URLパラメータから名前を取得
+# Function to logout/return to login screen
+def handle_logout():
+    st.session_state.student_name = None
+    st.query_params.clear()
+    st.rerun()
+
+# 1. Get name from URL or Session
 query_params = st.query_params
 url_student = query_params.get("student", None)
 
 if "student_name" not in st.session_state:
     st.session_state.student_name = url_student
 
-# 2. ログイン画面
+# 2. Login Screen (if no name is set)
 if not st.session_state.student_name:
-    st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
-    st.markdown("<h1 style='text-align: center;'>🎯 Welcome</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #64748b;'>お名前(苗字のみ)を入力してください</p>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-size: 48px !important;'>🎯 Welcome</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #64748b; font-size: 18px;'>お名前を入力して開始しましょう</p>", unsafe_allow_html=True)
     
-    _, center_col, _ = st.columns([1, 2, 1])
+    _, center_col, _ = st.columns([1, 1.5, 1])
     with center_col:
-        input_name = st.text_input("名前", placeholder="例：中村", label_visibility="collapsed")
-        if st.button("ログイン", use_container_width=True):
+        input_name = st.text_input("名前", placeholder="例：狩野", label_visibility="collapsed")
+        if st.button("ログインする", use_container_width=True):
             if input_name:
-                # 入力された名前の「タブ」が存在するかチェック
                 try:
                     spreadsheet.worksheet(input_name)
                     st.session_state.student_name = input_name
@@ -253,16 +187,17 @@ if not st.session_state.student_name:
     st.stop()
 
 # ==========================================
-# 📊 データ取得・処理 (ログイン後)
+# 📊 Data Loading (After Login)
 # ==========================================
 selected_student = st.session_state.student_name
 
 try:
-    # ログインした名前と同じ名前のタブを開く
     sheet = spreadsheet.worksheet(selected_student)
 except:
-    st.error("エラーが発生しました。もう一度ログインしてください。")
-    st.session_state.student_name = None
+    # Handle error if worksheet is missing or name is invalid
+    st.error(f"「{selected_student}」さんのデータにアクセスできませんでした。")
+    if st.button("ログイン画面に戻る"):
+        handle_logout()
     st.stop()
 
 def get_data():
@@ -283,45 +218,40 @@ def convert_drive_url(url):
     return url
 
 df = get_data()
-
-# 共通変数の準備
 tasks = []
 stats = { "total_active": 0, "graduated": 0 }
 
-JST_OFFSET = timedelta(hours=9)
-today_dt = datetime.utcnow() + JST_OFFSET
+JST = timedelta(hours=9)
+today_dt = datetime.utcnow() + JST
 today_date = today_dt.date()
 today_str = today_dt.strftime('%Y/%m/%d')
 tomorrow_str = (today_dt + timedelta(days=1)).strftime('%Y/%m/%d')
 
-# サイドバー設定
+# --- Header Section ---
+h_left, h_right = st.columns([4, 1])
+with h_left:
+    st.markdown(f"<h1>🎯 {selected_student} さんの学習シート</h1>", unsafe_allow_html=True)
+with h_right:
+    if st.button("🔄 切替/戻る", use_container_width=True, help="ログイン画面に戻ります"):
+        handle_logout()
+
+st.caption(f"こんにちは、{selected_student}さん。今日も一歩ずつ進んでいきましょう！")
+
+# --- Process Data ---
 with st.sidebar:
-    st.header("👤 Account")
-    st.info(f"ログイン: {selected_student}")
-    if st.button("ログアウト"):
-        st.session_state.student_name = None
-        st.query_params.clear()
-        st.rerun()
-    st.markdown("---")
     st.header("⚙️ Settings")
     min_score = st.slider("最低優先度", 0, 100, 70)
+    st.markdown("---")
+    st.write("※「戻る」ボタンで別の生徒に切り替えられます。")
 
-# タブ内の全データを処理 (生徒名フィルタは不要)
 for i, row in df.iterrows():
     try:
         if len(row) <= max(COL_Q_NUM, COL_LAST_DATE, COL_IMG_URL, COL_SCORE, COL_LV3_IDX): continue
-        
-        q_num = row[COL_Q_NUM]
-        last_date = row[COL_LAST_DATE]
-        raw_url = row[COL_IMG_URL]
+        q_num, last_date, raw_url = row[COL_Q_NUM], row[COL_LAST_DATE], row[COL_IMG_URL]
         img_url = convert_drive_url(raw_url) if str(raw_url).startswith("http") else None
-        
         try: score = int(float(row[COL_SCORE]))
         except: score = 0
-        
-        lv1 = str(row[COL_LV1_IDX]).upper() == "TRUE"
-        lv2 = str(row[COL_LV2_IDX]).upper() == "TRUE"
-        lv3 = str(row[COL_LV3_IDX]).upper() == "TRUE"
+        lv1, lv2, lv3 = [str(row[idx]).upper() == "TRUE" for idx in [COL_LV1_IDX, COL_LV2_IDX, COL_LV3_IDX]]
 
         if lv3: stats["graduated"] += 1
         else: stats["total_active"] += 1
@@ -344,23 +274,7 @@ for i, row in df.iterrows():
 
 tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 
-# ==========================================
-# メインUI構築
-# ==========================================
-st.markdown(f"""
-    <h1 style='font-family: "Zen Maru Gothic", sans-serif; font-weight: 900; font-size: 36px; color: #0f172a; margin-bottom: 0;'>
-        🎯 {selected_student}さんの学習サポート
-    </h1>
-""", unsafe_allow_html=True)
-st.caption(f"Hello, {selected_student}! 今日の弱点を克服しましょう。")
-
-with st.expander("💡 評価のめやす"):
-    st.markdown("""
-    - **🟢 余裕** ： 見た瞬間に解法が浮かび、迷わず解けた！ 
-    - **🟡 微妙** ： 解けたけど時間がかかった。少し自信がない。 
-    - **🔴 敗北** ： 解き方がわからなかった。間違えてしまった。 
-    """, unsafe_allow_html=True)
-
+# --- Dashboard ---
 m1, m2, m3 = st.columns(3)
 with m1: st.markdown(f"""<div class="metric-container"><div class="metric-label">🔥 今日の課題</div><div class="metric-value">{len(tasks)}</div></div>""", unsafe_allow_html=True)
 high_priority_count = sum(1 for t in tasks if t["score"] >= 100)
@@ -369,9 +283,10 @@ with m3: st.markdown(f"""<div class="metric-container"><div class="metric-label"
 
 st.markdown("---")
 
+# --- Task List ---
 if not tasks:
     st.balloons()
-    st.success(f"🎉 {selected_student}さん、今日の優先タスクはすべて完了です！")
+    st.success(f"🎉 お疲れ様でした！今日の優先課題はすべて完了です！")
 else:
     rows = [tasks[i:i + 2] for i in range(0, len(tasks), 2)]
     for row in rows:
@@ -381,10 +296,8 @@ else:
                 if task["lv2"]: stage_name, stage_color, progress_pct, target_check_col = "Lv3", "#3b82f6", "66%", WRITE_COL_LV3
                 elif task["lv1"]: stage_name, stage_color, progress_pct, target_check_col = "Lv2", "#8b5cf6", "33%", WRITE_COL_LV2
                 else: stage_name, stage_color, progress_pct, target_check_col = "Lv1", "#10b981", "5%", WRITE_COL_LV1
-                    
-                if task["score"] >= 100: border_color = "#ef4444"
-                elif task["score"] >= 50: border_color = "#f59e0b"
-                else: border_color = "#10b981"
+                
+                border_color = "#ef4444" if task["score"] >= 100 else ("#f59e0b" if task["score"] >= 50 else "#10b981")
 
                 st.markdown(f"""<div class="task-card"><div class="card-header-bar" style="background-color: {border_color};"></div><div class="card-content">""", unsafe_allow_html=True)
                 c_img, c_info = st.columns([1, 1])
@@ -393,20 +306,19 @@ else:
                     else: st.warning("No Image")
                 with c_info:
                     st.markdown(f"""<div class="stage-badge" style="background-color: {stage_color};">{stage_name}</div>""", unsafe_allow_html=True)
-                    display_date = task["date"] if task["date"] else "🆕 初挑戦"
-                    st.markdown(f"""<div class="info-label" style="margin-top:0;">LAST REVIEWED</div><div class="date-text">📅 {display_date}</div>""", unsafe_allow_html=True)
+                    st.markdown(f"""<div class="info-label">LAST REVIEWED</div><div class="date-text">📅 {task['date'] if task['date'] else '🆕 初挑戦'}</div>""", unsafe_allow_html=True)
                     st.markdown(f"""<div class="progress-track"><div class="progress-fill" style="width: {progress_pct}; background-color: {stage_color};"></div></div>""", unsafe_allow_html=True)
                     
-                    if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
+                    if st.button("🟢 余裕", key=f"e_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast(f"ナイス！出題間隔をあけます🚀", icon="🎉")
                         time.sleep(1); st.rerun()
-                    if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
+                    if st.button("🟡 微妙", key=f"s_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, tomorrow_str if stage_name=="Lv1" else today_str)
                         st.toast("OK！忘れないうちにまた復習しましょう💪", icon="🔄")
                         time.sleep(1); st.rerun()
-                    if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
+                    if st.button("🔴 敗北", key=f"b_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         if task["lv2"]: sheet.update_cell(task["index"], WRITE_COL_LV2, "FALSE")
                         elif task["lv1"]: sheet.update_cell(task["index"], WRITE_COL_LV1, "FALSE")
