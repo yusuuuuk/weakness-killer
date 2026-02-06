@@ -52,7 +52,7 @@ st.markdown("""
         padding-bottom: 0px !important;
     }
 
-    /* --- メトリクスエリア（ダッシュボード） --- */
+    /* --- メトリクスエリア --- */
     .metric-container {
         background: white;
         padding: 12px;
@@ -116,7 +116,7 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         object-fit: contain;
-        max-height: 500px; /* PCでの高さ */
+        max-height: 500px; 
         width: auto !important;
         max-width: 100%;
     }
@@ -168,6 +168,21 @@ st.markdown("""
         margin-bottom: 4px;
     }
 
+    /* --- トースト通知（st.toast）を見やすく修正 --- */
+    div[data-testid="stToast"] {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        opacity: 1 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+    }
+    div[data-testid="stToast"] p {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+    }
+
     /* --- スマホ調整 --- */
     @media only screen and (max-width: 600px) {
         div[data-testid="stImage"] img {
@@ -176,13 +191,12 @@ st.markdown("""
         [data-testid="column"] {
             padding: 0 !important;
         }
-        /* メトリクスコンテナの余白調整 */
         .metric-container {
             margin-bottom: 8px;
         }
     }
     
-    /* --- Streamlitの標準UIを隠す --- */
+    /* --- Streamlit標準UI非表示 --- */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -210,7 +224,6 @@ def get_data():
     return pd.DataFrame(all_values[1:], columns=all_values[0])
 
 def convert_drive_url(url):
-    """GoogleドライブのURLを直リンク(lh3)に変換"""
     if not isinstance(url, str): return None
     file_id = None
     if "drive.google.com" in url and "id=" in url:
@@ -227,18 +240,15 @@ def convert_drive_url(url):
 df = get_data()
 tasks = []
 
-# 統計データの初期化
 stats = {
-    "total_active": 0, # 未卒業の総数
-    "graduated": 0,    # 卒業済み
+    "total_active": 0, 
+    "graduated": 0,    
 }
 
-# 日本時間の今日を取得 (サーバー時間はUTCなので+9時間)
 JST = timedelta(hours=9)
 today_date = (datetime.utcnow() + JST).date()
 today_str = (datetime.utcnow() + JST).strftime('%Y/%m/%d')
 
-# サイドバーフィルタ
 with st.sidebar:
     st.header("⚙️ 設定")
     min_score = st.slider("最低優先度", 0, 100, 70)
@@ -257,33 +267,26 @@ for i, row in df.iterrows():
         lv2 = str(row[COL_LV2_IDX]).upper() == "TRUE"
         lv3 = str(row[COL_LV3_IDX]).upper() == "TRUE"
 
-        # 統計集計（フィルタリング前に行う）
         if lv3:
             stats["graduated"] += 1
         else:
             stats["total_active"] += 1
 
-        # ★今日やったかどうかを判定
+        # 今日やったか判定
         is_today_done = False
         if last_date:
             try:
-                # 日付フォーマットの揺らぎ吸収 (yyyy/mm/dd or mm/dd)
                 if len(last_date.split('/')) == 3:
                     ld_obj = datetime.strptime(last_date, '%Y/%m/%d').date()
                 elif len(last_date.split('/')) == 2:
-                    # 年がない場合は今年と仮定
                     ld_obj = datetime.strptime(last_date, '%m/%d').date().replace(year=today_date.year)
                 else:
                     ld_obj = None
                 
-                # 前回実施日が「今日」なら除外フラグを立てる
                 if ld_obj == today_date:
                     is_today_done = True
-            except:
-                pass
+            except: pass
 
-        # リスト追加条件
-        # 「卒業していない」かつ「スコア条件クリア」かつ「★今日やっていない」
         if not lv3 and score >= min_score and not is_today_done:
             tasks.append({
                 "index": i + 2,
@@ -298,22 +301,17 @@ for i, row in df.iterrows():
 tasks = sorted(tasks, key=lambda x: x["score"], reverse=True)
 
 # ==========================================
-# 🖥️ メインUI構築
+# メインUI構築
 # ==========================================
-
-# フォントを強制適用したタイトル
 st.markdown("""
     <h1 style='font-family: "Zen Maru Gothic", sans-serif; font-weight: 900; font-size: 36px; color: #0f172a; margin-bottom: 0;'>
         🎯 反復学習サポート
     </h1>
 """, unsafe_allow_html=True)
-
 st.caption("Strategic Learning Management System")
 
-# ダッシュボード (3カラム)
+# ダッシュボード
 m1, m2, m3 = st.columns(3)
-
-# 1. 今日の課題 (フィルタリング後の数)
 with m1:
     st.markdown(f"""
     <div class="metric-container">
@@ -321,8 +319,6 @@ with m1:
         <div class="metric-value">{len(tasks)}</div>
     </div>
     """, unsafe_allow_html=True)
-
-# 2. 危険な課題 (表示中のタスクのうちスコア100以上)
 high_priority_count = sum(1 for t in tasks if t["score"] >= 100)
 with m2:
     st.markdown(f"""
@@ -331,8 +327,6 @@ with m2:
         <div class="metric-value danger">{high_priority_count}</div>
     </div>
     """, unsafe_allow_html=True)
-
-# 3. 卒業済み (統計データから)
 with m3:
     st.markdown(f"""
     <div class="metric-container">
@@ -343,15 +337,11 @@ with m3:
 
 st.markdown("---")
 
-# タスクリスト
 if not tasks:
     st.balloons()
     st.success("🎉 All priority tasks completed!")
     st.info(f"現在、未卒業の弱点は残り {stats['total_active']} 問です。サイドバーのフィルタを調整して復習しましょう！")
 else:
-    # -------------------------------------------------------
-    # 🖥️ グリッド表示ロジック (2列)
-    # -------------------------------------------------------
     rows = [tasks[i:i + 2] for i in range(0, len(tasks), 2)]
 
     for row in rows:
@@ -359,7 +349,6 @@ else:
         
         for idx, task in enumerate(row):
             with cols[idx]:
-                # --- カード描画 ---
                 if task["lv2"]:
                     stage_name = "Lv3"
                     stage_color = "#3b82f6"
@@ -412,28 +401,43 @@ else:
                     """, unsafe_allow_html=True)
 
                     # ==========================================
-                    # 👇 ボタン (縦並び・ラベル付き)
+                    # 👇 ボタンアクション (降格システム実装)
                     # ==========================================
+                    today_str = datetime.now().strftime('%Y/%m/%d')
                     
-                    # 🟢 余裕
+                    # 🟢 余裕 (進級)
                     if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        st.toast("Level Up!")
+                        st.toast(f"ナイス！次のレベル({stage_name}クリア)へ進みます🚀", icon="🎉")
                         time.sleep(1)
                         st.rerun()
                     
-                    # 🟡 微妙
+                    # 🟡 微妙 (維持)
                     if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        st.toast("Keep trying!")
+                        st.toast("OK！同じレベルでもう一度練習しましょう💪", icon="🔄")
                         time.sleep(1)
                         st.rerun()
                         
-                    # 🔴 敗北
+                    # 🔴 敗北 (降格)
                     if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
+                        # 日付は更新する（今日やったことにはなる）
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
-                        st.toast("Don't worry!")
+                        
+                        # 降格処理: 今いるレベルの1つ前のチェックボックスを外す
+                        demotion_msg = "ドンマイ！また明日復習しましょう🔥"
+                        
+                        if task["lv2"]: # 今Lv3挑戦中 -> Lv2挑戦中へ (Lv2チェックを外す)
+                            sheet.update_cell(task["index"], WRITE_COL_LV2, "FALSE")
+                            demotion_msg = "Lv2に戻って基礎を固め直します！🛡️"
+                        elif task["lv1"]: # 今Lv2挑戦中 -> Lv1挑戦中へ (Lv1チェックを外す)
+                            sheet.update_cell(task["index"], WRITE_COL_LV1, "FALSE")
+                            demotion_msg = "Lv1に戻ってやり直しましょう！🌱"
+                        
+                        # Lv1の場合は下がりようがないので、そのまま（次回は明日出題される）
+                        
+                        st.toast(demotion_msg, icon="📉")
                         time.sleep(1)
                         st.rerun()
 
