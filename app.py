@@ -438,7 +438,7 @@ else:
                     # ==========================================
                     
                     # 🟢 余裕 (進級)
-                    if st.button("🟢 余裕", key=f"easy_{task['index']}", help="見た瞬間に解法が浮かび、迷わず解けた場合に選びましょう！", use_container_width=True):
+                    if st.button("🟢 余裕", key=f"easy_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], target_check_col, True)
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast(f"ナイス！見た瞬間に解法が浮かんだので、次のレベル({stage_name}クリア)へ進みます🚀", icon="🎉")
@@ -446,14 +446,14 @@ else:
                         st.rerun()
                     
                     # 🟡 微妙 (維持)
-                    if st.button("🟡 微妙", key=f"soso_{task['index']}", help="解けたけれど時間がかかったり、少し自信がない場合に選びましょう。", use_container_width=True):
+                    if st.button("🟡 微妙", key=f"soso_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         st.toast("OK！解けたけれど不安があるため、同じレベルでもう一度練習しましょう💪", icon="🔄")
                         time.sleep(1)
                         st.rerun()
                         
                     # 🔴 敗北 (降格)
-                    if st.button("🔴 敗北", key=f"bad_{task['index']}", help="解き方がわからなかったり、間違えてしまった場合に選びましょう。", use_container_width=True):
+                    if st.button("🔴 敗北", key=f"bad_{task['index']}", use_container_width=True):
                         sheet.update_cell(task["index"], WRITE_COL_DATE, today_str)
                         
                         demotion_msg = "ドンマイ！今は解けなかったので、また明日復習しましょう🔥"
