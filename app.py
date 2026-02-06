@@ -184,7 +184,7 @@ st.markdown("""
         align-items: center !important;
     }
     div[data-testid="stToast"] [data-testid="stMarkdownContainer"] p {
-        font-size: 16px !important;
+        font-size: 12px !important;
         font-weight: 700 !important;
         color: #1e293b !important;
         line-height: 1.4 !important; /* 行間を詰めつつ重ならない設定 */
