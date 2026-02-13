@@ -234,6 +234,16 @@ with h_left:
 
 st.caption(f"Hello、{selected_student}さん。今日も一歩ずつ進んでいきましょう！")
 
+with st.expander("💡 評価のめやす（どのボタンを押す？）"):
+    st.markdown("""
+    - **🟢 余裕** ： 見た瞬間に解法が浮かび、迷わず解けた！ 
+        - → <span style='color:#10b981; font-weight:bold;'>Lvが進み、次は数日〜1ヶ月後に出ます。</span>
+    - **🟡 微妙** ： 解けたけど時間がかかった。少し自信がない。 
+        - → <span style='color:#f59e0b; font-weight:bold;'>Lvは維持。忘れないうちに数日後に再出題されます。</span>
+    - **🔴 敗北** ： 解き方がわからなかった。間違えてしまった。 
+        - → <span style='color:#ef4444; font-weight:bold;'>Lvが下がるか、明日すぐリベンジ出題されます。</span>
+    """, unsafe_allow_html=True)
+
 # --- Process Data ---
 with st.sidebar:
     st.header("⚙️ Settings")
